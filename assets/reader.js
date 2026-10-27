@@ -218,7 +218,7 @@
     // page, and the pointer becomes a hand. Edges with no page to turn to stay plain, and the shade
     // gives way while a corner is lifted or a page is turning.
     function edges(flip, box, pw) {
-      var band = Math.max(28, pw * 0.08);
+      var band = Math.max(56, pw * 0.16);
       var shades = ["l", "r"].map(function (side) {
         var el = document.createElement("div");
         el.className = "cx-edge cx-edge-" + side;
