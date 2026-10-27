@@ -1,7 +1,6 @@
 // Website reader. On wide screens the A4 pages are a book, two facing pages fitted to the window,
-// turned as bending paper: with the arrows, the keys, a click on a page's outer edge, or by taking
-// hold of the page and dragging it. On narrow screens the pages scroll, one under the other.
-// ?print=1 prints.
+// turned by StPageFlip (vendor/page-flip-2.0.7.js, MIT): drag a corner, click a page, or use the
+// arrows and keys. On narrow screens the pages scroll, one under the other. ?print=1 prints.
 (function () {
   "use strict";
   function ready(fn) {
@@ -12,313 +11,258 @@
     var pages = Array.prototype.slice.call(document.querySelectorAll(".page"));
     var links = Array.prototype.slice.call(document.querySelectorAll(".cx-pages a"));
     var bar = document.querySelector(".cx-bar"), tk = document.querySelector(".tk");
-    document.querySelectorAll('.cx-language').forEach(function (link) {
-      link.addEventListener('click', function () {
-        link.setAttribute('href', link.getAttribute('href').split('#')[0] +
-          (window.location.hash || '#p' + (at + 1)));
-      });
-    });
     var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var PW = 794, PH = 1123, GAP = 0;  // A4 at 96 dpi
-    var TURN = 850, STRIPS = 14, BEND = 70;  // ms per turn; strips the sheet bends at; most curl, in degrees
-    var EDGE = 0.09;  // share of a page's width, at its outer edge, that turns it when clicked
-    var WIDE = 900;  // narrowest window that shows the book
+    var PW = 794, PH = 1123;  // A4 at 96 dpi
+    var WIDE = 900, TURN = 900;  // narrowest window that shows the book; ms per turn
     pages.forEach(function (p, i) { p.id = "p" + (i + 1); });
 
     var prevBtn = document.createElement("button"), nextBtn = document.createElement("button");
-    prevBtn.className = "cx-turn cx-turn-prev"; prevBtn.type = "button"; prevBtn.setAttribute("aria-label", document.documentElement.lang === "tr" ? "Önceki sayfalar" : "Previous pages"); prevBtn.textContent = "‹";
-    nextBtn.className = "cx-turn cx-turn-next"; nextBtn.type = "button"; nextBtn.setAttribute("aria-label", document.documentElement.lang === "tr" ? "Sonraki sayfalar" : "Next pages"); nextBtn.textContent = "›";
+    prevBtn.className = "cx-turn cx-turn-prev"; prevBtn.type = "button"; prevBtn.setAttribute("aria-label", "Previous pages"); prevBtn.textContent = "‹";
+    nextBtn.className = "cx-turn cx-turn-next"; nextBtn.type = "button"; nextBtn.setAttribute("aria-label", "Next pages"); nextBtn.textContent = "›";
     document.body.appendChild(prevBtn); document.body.appendChild(nextBtn);
-    var hint = document.createElement("div");
-    hint.className = "cx-edge";
-    document.body.appendChild(hint);
 
-    var per = 2, at = 0, busy = false, book = false;  // pages per view; first page in view; book or scroll
-    function view(i) { return i - i % per; }
-    function shown(first) { return pages.slice(first, first + per); }
+    var at = 0, flip = null;  // the current page (first of the spread in the book); the book, while shown
+    var canBook = pages.length > 1 && window.St && window.St.PageFlip;
+
+    function mark(i, per) {
+      at = i;
+      links.forEach(function (a, k) {
+        var here = k >= i && k < i + per;
+        a.classList.toggle("on", here);
+        a.setAttribute("aria-current", here ? "page" : "false");
+      });
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i + per >= pages.length;
+    }
+
+    // Take the book apart: the pages go back into the page flow, as the template made them.
+    function unbook() {
+      if (!flip) return;
+      pages.forEach(function (p) { root.appendChild(p); });
+      flip.destroy();
+      flip = null;
+    }
+
+    // Build the book at the window's size. The library works in screen pixels, so it gets the zoomed
+    // page size; each page keeps its own fixed layout inside a sheet, scaled by --cx-zoom.
+    function book() {
+      unbook();
+      var top = bar ? bar.offsetHeight : 0, foot = tk ? tk.offsetHeight : 0;
+      var w = document.documentElement.clientWidth, h = window.innerHeight - top - foot;
+      var z = Math.min(1, (w - 120) / (2 * PW), (h - 32) / PH);
+      var pw = Math.floor(PW * z), ph = Math.floor(PH * z);
+      document.documentElement.style.setProperty("--cx-zoom", z.toFixed(4));
+      root.style.height = h + "px";
+      var box = document.createElement("div");
+      box.className = "cx-flip";
+      box.style.width = 2 * pw + "px"; box.style.height = ph + "px";
+      var sheets = pages.map(function (p) {
+        var s = document.createElement("div");
+        s.className = "cx-sheet";
+        s.appendChild(p);
+        box.appendChild(s);
+        return s;
+      });
+      root.appendChild(box);
+      flip = new St.PageFlip(box, {
+        width: pw, height: ph, size: "fixed", autoSize: false, usePortrait: false, showCover: false,
+        startPage: at - at % 2, flippingTime: still ? 1 : TURN, drawShadow: true, maxShadowOpacity: 0.45,
+        showPageCorners: true, mobileScrollSupport: false, clickEventForward: true, disableFlipByClick: false
+      });
+      flip.loadFromHTML(sheets);
+      soften(flip, box);
+      flip.on("flip", function (e) {
+        mark(e.data - e.data % 2, 2);
+        history.replaceState(null, "", "#p" + (at + 1));
+      });
+      mark(at - at % 2, 2);
+    }
+
+    // StPageFlip moves the corner straight to the pointer, lifts it from a wide area, lands pages at
+    // an even speed and shades the fold like gloss. This wraps its controller on the live instance
+    // (the vendored file stays as published): only a small area at each corner lifts the page; the
+    // curl starts flat and eases after the pointer, eases back flat when the pointer leaves, and picks
+    // up from where it is if the pointer returns; releases and turns glide and slow as they land.
+    // The fold shading becomes one soft falloff, like matte paper.
+    function soften(flip, box) {
+      var fc = flip.getFlipController(), render = flip.getRender();
+      var mode = null, cur = null, target = null, raf = 0, last = 0;  // "corner" (hover) or "drag"
+      var EASE = { corner: 120, drag: 60 };  // ms for the curl to close most of the gap to the pointer
+
+      function rect() { return fc.getBoundsRect(); }
+      function here() { return render.convertToGlobal(fc.getCalculation().getPosition()); }
+      // where a fold starts flat: the page's outer edge, at the corner or level with the pointer
+      function edge(pos, corner) {
+        var r = rect(), fwd = pos.x > r.left + r.width / 2;
+        var y = corner ? (pos.y < r.top + r.height / 2 ? r.top + 1 : r.top + r.height - 1)
+                       : Math.max(r.top + 1, Math.min(r.top + r.height - 1, pos.y));
+        return { x: fwd ? r.left + r.width - 1 : r.left + 1, y: y };
+      }
+      function halt() { if (raf) cancelAnimationFrame(raf); raf = 0; mode = null; }
+      function freeze() { if (glide) cancelAnimationFrame(glide); glide = 0; }  // stop a settle where it is
+      var glide = 0;
+
+      // Only a small quarter-circle at each outer corner lifts the page on hover, so links near the
+      // foot of a page can be reached without the corner coming to the pointer.
+      fc.isPointOnCorners = function (pos) {
+        var r = rect(), b = render.convertToBook(pos), reach = Math.max(60, r.pageWidth * 0.165);
+        if (b.x <= 0 || b.y <= 0 || b.x >= r.width || b.y >= r.height) return false;
+        var dx = Math.min(b.x, r.width - b.x), dy = Math.min(b.y, r.height - b.y);
+        return Math.sqrt(dx * dx + dy * dy) < reach;
+      };
+      function tick(now) {
+        raf = 0;
+        if (!mode || !fc.getCalculation()) { mode = null; return; }
+        var k = 1 - Math.exp(-Math.min(64, now - last) / EASE[mode]);
+        last = now;
+        cur = { x: cur.x + (target.x - cur.x) * k, y: cur.y + (target.y - cur.y) * k };
+        var pt = render.convertToPage(cur);
+        try { fc.do({ x: Math.round(pt.x), y: Math.round(pt.y) }); } catch (_) {}
+        raf = requestAnimationFrame(tick);
+      }
+      function run(m, from, to) {
+        mode = m; cur = from; target = to;
+        if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+      }
+      // Let go of a hover or a drag, or turn: the page settles back flat, or over if it is past the
+      // spine. The library moves at an even speed and stops dead; this glides and slows as it lands.
+      function settle(over) {
+        halt(); freeze();
+        var calc = fc.getCalculation();
+        if (!calc) return;
+        var r = rect(), from = calc.getPosition();
+        var to = { x: over ? -r.pageWidth : r.pageWidth, y: calc.getCorner() === "bottom" ? r.height : 0 };
+        var span = Math.abs(to.x - from.x) / (2 * r.pageWidth);  // share of a full turn left to go
+        var ms = still ? 1 : 420 + 900 * span, t0 = null;
+        fc.setState(over ? "flipping" : "fold_corner");
+        function land(now) {
+          glide = 0;
+          if (!fc.getCalculation()) return;
+          if (t0 === null) t0 = now;
+          var q = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - q, 3);  // fast off the hand, slow at the end
+          // whole pixels, as the library's own animations use; it has no answer for some fractional points
+          try { fc.do({ x: Math.round(from.x + (to.x - from.x) * e), y: Math.round(from.y + (to.y - from.y) * e) }); } catch (_) {}
+          if (q < 1) { glide = requestAnimationFrame(land); return; }
+          if (over) { if (calc.getDirection() === 1) flip.turnToPrevPage(); else flip.turnToNextPage(); }
+          render.setBottomPage(null);
+          render.setFlippingPage(null);
+          render.clearShadow();
+          fc.setState("read");
+          fc.reset();
+        }
+        glide = requestAnimationFrame(land);
+      }
+
+      fc.showCorner = function (pos) {
+        if (!fc.checkState("read", "fold_corner")) return;
+        var on = fc.isPointOnCorners(pos);
+        if (mode === "corner") { if (on) target = pos; else settle(false); return; }
+        if (!on) return;
+        if (fc.getCalculation() && fc.checkState("fold_corner")) {  // came back while it was settling
+          freeze();
+          run("corner", here(), pos);
+          return;
+        }
+        var from = edge(pos, true);
+        if (!fc.start(from)) return;
+        fc.setState("fold_corner");
+        fc.do(render.convertToPage(from));
+        run("corner", from, pos);
+      };
+      fc.fold = function (pos) {
+        if (mode === "drag") { target = pos; return; }
+        var from;
+        if (fc.getCalculation() && fc.checkState("fold_corner", "user_fold")) { freeze(); from = mode === "corner" ? cur : here(); }
+        else {
+          from = edge(pos, false);
+          if (!fc.start(from)) return;
+          fc.do(render.convertToPage(from));
+        }
+        halt();
+        fc.setState("user_fold");
+        run("drag", from, pos);
+      };
+      fc.stopMove = function () {
+        if (mode !== "drag") { var calc = fc.getCalculation(); if (calc) settle(calc.getPosition().x <= 0); return; }
+        // decide by where the pointer is, but move from where the paper is
+        settle(render.convertToPage(target).x <= 0);
+      };
+      fc.fold = (function (fold) {
+        return function (pos) { if (!fc.checkState("flipping")) fold(pos); };  // a turn in progress finishes first
+      })(fc.fold);
+      fc.flip = function (pos) {
+        if (fc.checkState("flipping")) return;
+        if (mode === "corner" && fc.getCalculation()) { settle(true); return; }
+        // a click, button or key: lift the corner a little, then glide it over like a release
+        halt(); freeze();
+        if (!fc.start(pos)) return;
+        var r = rect(), lift = r.height / 10, bottom = fc.getCalculation().getCorner() === "bottom";
+        fc.do({ x: r.pageWidth - lift, y: bottom ? r.height - lift : lift });
+        settle(true);
+      };
+      box.addEventListener("mouseleave", function () { if (mode === "corner") settle(false); });
+
+      var inner = render.drawInnerShadow.bind(render);
+      render.drawInnerShadow = function () {
+        inner();
+        var el = render.innerShadow, dir = /linear-gradient\(\s*([^,]+),/.exec(el.style.cssText);
+        if (!dir) return;
+        var o = render.shadow.opacity;
+        el.style.background = "linear-gradient(" + dir[1] + ", rgba(17,18,20," + (o * 0.55).toFixed(3) + ") 0%, rgba(17,18,20," +
+          (o * 0.22).toFixed(3) + ") 22%, rgba(17,18,20,0) 70%)";
+      };
+    }
 
     // zoom only after the template has measured and fixed its boxes at full size
     function fit() {
-      var w = document.documentElement.clientWidth, top = bar ? bar.offsetHeight : 0, foot = tk ? tk.offsetHeight : 0;
-      var was = book;
-      book = w >= WIDE && pages.length > 1;
-      document.body.classList.toggle("cx-book", book);
-      document.body.classList.toggle("cx-two", book);
-      if (!book) {
-        per = 1;
-        document.documentElement.style.setProperty("--cx-zoom", Math.min(1, (w - 24) / PW).toFixed(3));
-        root.style.height = "";
-        pages.forEach(function (p) { p.style.gridColumn = ""; });
-        showHint(null);
-        mark(at);
-        if (was) pages[at].scrollIntoView();
-        return;
-      }
-      per = 2;
-      var h = window.innerHeight - top - foot - 32;
-      var z = Math.min(1, (w - 120) / (PW * per + GAP), h / PH);
-      document.documentElement.style.setProperty("--cx-zoom", z.toFixed(3));
-      root.style.height = (window.innerHeight - top - foot) + "px";
-      pages.forEach(function (p, i) { p.style.gridColumn = String(i % 2 + 1); });
-      show(view(at));
+      var wide = canBook && document.documentElement.clientWidth >= WIDE;
+      var was = !!flip;
+      document.body.classList.toggle("cx-book", wide);
+      if (wide) { book(); return; }
+      unbook();
+      root.style.height = "";
+      document.documentElement.style.setProperty("--cx-zoom", Math.min(1, (document.documentElement.clientWidth - 24) / PW).toFixed(3));
+      mark(at, 1);
+      if (was) pages[at].scrollIntoView();
     }
 
     // scrolling: the page in view is the current one
-    function mark(i) {
-      at = i;
-      links.forEach(function (a, k) { a.classList.toggle("on", k === i); a.setAttribute("aria-current", k === i ? "page" : "false"); });
-    }
     if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (entries) {
-        if (book) return;
-        entries.forEach(function (e) { if (e.isIntersecting) mark(pages.indexOf(e.target)); });
+        if (flip) return;
+        entries.forEach(function (e) { if (e.isIntersecting) mark(pages.indexOf(e.target), 1); });
       }, { rootMargin: "-45% 0px -50% 0px" });
       pages.forEach(function (p) { io.observe(p); });
     }
 
-    function show(first) {
-      at = first;
-      var on = shown(first);
-      pages.forEach(function (p) { p.classList.toggle("cx-on", on.indexOf(p) >= 0); p.classList.remove("cx-under", "cx-over"); });
-      links.forEach(function (a, k) {
-        var here = k >= first && k < first + per;
-        a.classList.toggle("on", here);
-        a.setAttribute("aria-current", here ? "page" : "false");
-      });
-      prevBtn.disabled = first === 0;
-      nextBtn.disabled = first + per >= pages.length;
-    }
-
-    // One face of the turning sheet: a strip-sized window onto a copy of a page (or blank paper).
-    function face(src, offset, back) {
-      var f = document.createElement("div"), shade = document.createElement("i");
-      f.className = "cx-face" + (back ? " cx-back" : "");
-      if (src) {
-        var hold = document.createElement("div"), copy = src.cloneNode(true);
-        copy.removeAttribute("id");
-        copy.classList.remove("cx-under", "cx-over");
-        copy.classList.add("cx-on");
-        hold.className = "cx-at"; hold.style.left = offset + "px";
-        hold.appendChild(copy); f.appendChild(hold);
-      }
-      shade.className = "cx-shade"; f.appendChild(shade);
-      return { el: f, shade: shade };
-    }
-
-    // The sheet is cut into strips hinged one to the next; each bends a little more than the last,
-    // so the free edge leads and the paper curls rather than swinging as one board.
-    // draw(e) poses it: 0 lying flat where it started, 1 turned over onto the other side.
-    function leaf(front, back, hinge) {
-      var r = front.getBoundingClientRect(), W = r.width, H = r.height, w = W / STRIPS, left = hinge === "left";
-      var box = document.createElement("div"), cast = document.createElement("i");
-      box.className = "cx-leaf";
-      box.style.cssText = "left:" + r.left + "px;top:" + r.top + "px;width:" + W + "px;height:" + H + "px;perspective:" +
-        Math.round(W * 3) + "px;perspective-origin:" + (left ? "0" : W + "px") + " 50%";
-      cast.className = "cx-cast" + (left ? "" : " cx-cast-r");
-      box.appendChild(cast);
-      var parent = box, strips = [];
-      for (var k = 0; k < STRIPS; k++) {
-        var s = document.createElement("div");
-        s.className = "cx-strip";
-        s.style.cssText = "width:" + w + "px;height:" + H + "px;left:" + (k === 0 ? (left ? 0 : W - w) : (left ? w : -w)) +
-          "px;transform-origin:" + (left ? "left" : "right") + " center";
-        var f = face(front, left ? -k * w : -(W - (k + 1) * w), false);
-        var b = face(back, left ? -(W - (k + 1) * w) : -k * w, true);
-        s.appendChild(f.el); s.appendChild(b.el);
-        parent.appendChild(s);
-        strips.push({ el: s, front: f.shade, back: b.shade });
-        parent = s;
-      }
-      document.body.appendChild(box);
-      var sign = left ? -1 : 1;
-      return {
-        el: box, width: W, left: left,
-        draw: function (e) {
-          var bend = BEND * Math.sin(Math.PI * e), acc = 0, prev = 0;
-          strips.forEach(function (st, k) {
-            var g = Math.pow((k + 1) / STRIPS, 2);
-            var rel = (k === 0 ? 180 * e - bend / 2 : 0) + bend * (g - prev);
-            prev = g; acc += rel;
-            st.el.style.transform = "rotateY(" + (sign * rel).toFixed(2) + "deg)";
-            var c = Math.cos(acc * Math.PI / 180);
-            st.front.style.opacity = (0.32 * (1 - c)).toFixed(3);
-            st.back.style.opacity = (0.32 * (1 + c)).toFixed(3);
-          });
-          cast.style.opacity = Math.sin(Math.PI * e).toFixed(3);
-        }
-      };
-    }
-
-    // Lift the page for a turn to `first`: in a spread the leaving page curls over the spine and its
-    // back is the arriving page; one page at a time, the page peels away to the left (or back in from it).
-    // Returns the turn, posed at its start (t.from); t.to is where it ends.
-    function lift(first, fwd) {
-      var old = shown(at), neu = shown(first), t = { first: first, from: 0, to: 1 };
-      if (per === 2) {
-        var front = fwd ? old[1] : old[0], behind = fwd ? neu[1] : neu[0];
-        if (!front) return null;
-        t.sheet = leaf(front, fwd ? neu[0] : neu[1], fwd ? "left" : "right");
-        if (behind) behind.classList.add("cx-under");
-        front.classList.remove("cx-on");
-      } else if (fwd) {
-        t.sheet = leaf(old[0], null, "left");
-        neu[0].classList.add("cx-under");
-        old[0].classList.remove("cx-on");
-      } else {
-        t.sheet = leaf(neu[0], null, "left");
-        t.from = 1; t.to = 0;
-      }
-      t.sheet.draw(t.from);
-      return t;
-    }
-
-    // Move a lifted page from pose e to its end (commit) or back to its start, then put the book right.
-    function settle(t, e, commit, ms, ease) {
-      var goal = commit ? t.to : t.from, t0 = null;
-      function tick(now) {
-        if (t0 === null) t0 = now;
-        var q = ms ? Math.min(1, (now - t0) / ms) : 1;
-        t.sheet.draw(e + (goal - e) * ease(q));
-        if (q < 1) { requestAnimationFrame(tick); return; }
-        if (commit) history.replaceState(null, "", "#p" + (t.first + 1));
-        show(commit ? t.first : at);
-        t.sheet.el.remove();
-        busy = false;
-      }
-      busy = true;
-      requestAnimationFrame(tick);
-    }
-    function inOut(q) { return 0.5 - 0.5 * Math.cos(Math.PI * q); }
-    function out(q) { return 1 - Math.pow(1 - q, 3); }
-
     function go(i) {
       i = Math.max(0, Math.min(pages.length - 1, i));
-      if (!book) {
-        pages[i].scrollIntoView({ behavior: "smooth" });
-        history.replaceState(null, "", "#p" + (i + 1));
+      if (flip) {
+        if (i - i % 2 !== at) flip.flip(i, "top");
         return;
       }
-      var first = view(i);
-      if (first === at || busy) return;
-      if (still || !document.body.animate) {
-        history.replaceState(null, "", "#p" + (first + 1));
-        show(first);
-        return;
-      }
-      var t = lift(first, first > at);
-      if (t) settle(t, t.from, true, TURN, inOut); else show(first);
+      pages[i].scrollIntoView({ behavior: "smooth" });
+      history.replaceState(null, "", "#p" + (i + 1));
     }
-    function step(fwd) { go(fwd ? at + per : at - per); }
-
-    // Which page the point is on, and whether it is that page's outer edge (+1 next, -1 back, 0 neither).
-    function spot(x, y) {
-      var on = shown(at);
-      for (var k = 0; k < on.length; k++) {
-        var r = on[k].getBoundingClientRect();
-        if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
-        var zone = r.width * EDGE, idx = at + k, dir = 0;
-        var outerRight = per === 1 || idx % 2 === 1, outerLeft = per === 1 || idx % 2 === 0;
-        if (outerRight && x > r.right - zone && at + per < pages.length) dir = 1;
-        else if (outerLeft && x < r.left + zone && at > 0) dir = -1;
-        return { page: on[k], rect: r, dir: dir };
-      }
-      return null;
+    function step(fwd) {
+      if (flip) { if (fwd) flip.flipNext("top"); else flip.flipPrev("top"); return; }
+      go(fwd ? at + 1 : at - 1);
     }
 
-    function showHint(s) {
-      if (!s || !s.dir || busy) { hint.classList.remove("on"); root.style.cursor = ""; return; }
-      var r = s.rect, zone = r.width * EDGE;
-      hint.style.cssText = "top:" + r.top + "px;height:" + r.height + "px;width:" + zone + "px;left:" +
-        (s.dir > 0 ? r.right - zone : r.left) + "px";
-      hint.classList.toggle("cx-edge-l", s.dir < 0);
-      hint.classList.add("on");
-      root.style.cursor = "pointer";
-    }
-
-    // Taking hold of the page: on touch anywhere on it, with a mouse at its outer edge. The sheet
-    // follows the pointer; letting go past halfway (or with a flick) turns it, otherwise it falls back.
-    var hold = null, swallow = false;
-    root.addEventListener("pointerdown", function (ev) {
-      if (!book || busy || ev.button > 0 || still) return;
-      if (window.visualViewport && visualViewport.scale > 1.05) return;  // pinch-zoomed in to read: leave it
-      var s = spot(ev.clientX, ev.clientY);
-      if (!s) return;
-      var touch = ev.pointerType !== "mouse";
-      if (!touch && !s.dir) return;
-      if (!touch && ev.target.closest && ev.target.closest("a")) return;
-      hold = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, edge: s.dir, touch: touch, t: null, moved: false,
-               trail: [{ x: ev.clientX, at: ev.timeStamp }] };
-    });
-    root.addEventListener("pointermove", function (ev) {
-      if (!hold) { if (book && ev.pointerType === "mouse") showHint(spot(ev.clientX, ev.clientY)); return; }
-      if (ev.pointerId !== hold.id) return;
-      var dx = ev.clientX - hold.x0, dy = ev.clientY - hold.y0;
-      if (!hold.t) {
-        if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) {
-          if (Math.abs(dy) > 12) hold = null;  // a vertical move is not a page turn
-          return;
-        }
-        var fwd = dx < 0, first = fwd ? at + per : at - per;
-        if (hold.edge && fwd !== hold.edge > 0) { hold = null; return; }  // an edge only turns its own way
-        if (first < 0 || first >= pages.length) { hold = null; return; }
-        hold.t = lift(view(first), fwd);
-        if (!hold.t) { hold = null; return; }
-        hold.fwd = fwd; hold.moved = true; busy = true;
-        showHint(null);
-        try { root.setPointerCapture(ev.pointerId); } catch (_) {}
-        document.body.classList.add("cx-dragging");
-      }
-      hold.trail.push({ x: ev.clientX, at: ev.timeStamp });
-      if (hold.trail.length > 6) hold.trail.shift();
-      hold.t.sheet.draw(pose(hold, dx));
-      ev.preventDefault();
-    });
-    // How far over the sheet is for a drag of dx: in a spread the free edge stays under the finger;
-    // a single page turns over the width of the screen.
-    function pose(h, dx) {
-      var W = h.t.sheet.width, d = h.fwd ? -dx : dx, e;
-      if (per === 2) e = Math.acos(Math.max(-1, Math.min(1, 1 - d / W))) / Math.PI;
-      else e = Math.max(0, Math.min(1, d / (0.9 * W)));
-      e = Math.max(0, Math.min(1, e));
-      return h.t.from === 0 ? e : 1 - e;
-    }
-    function release(ev) {
-      if (!hold || ev.pointerId !== hold.id) return;
-      var h = hold;
-      hold = null;
-      document.body.classList.remove("cx-dragging");
-      if (!h.t) {
-        // a tap or click on the outer edge turns the page
-        if (ev.type === "pointerup" && h.edge && Math.abs(ev.clientX - h.x0) < 8 && Math.abs(ev.clientY - h.y0) < 8) {
-          swallow = true;
-          step(h.edge > 0);
-        }
-        return;
-      }
-      swallow = true;
-      var e = pose(h, ev.clientX - h.x0), done = Math.abs(e - h.t.from);
-      var a = h.trail[0], b = h.trail[h.trail.length - 1], v = (b.x - a.x) / Math.max(1, b.at - a.at);  // px per ms
-      var flick = (h.fwd ? -v : v) > 0.35, back = (h.fwd ? -v : v) < -0.35;
-      var commit = ev.type === "pointerup" && !back && (done > 0.5 || (flick && done > 0.04));
-      var left = Math.abs((commit ? h.t.to : h.t.from) - e);
-      settle(h.t, e, commit, Math.max(140, TURN * 0.8 * left), out);
-    }
-    root.addEventListener("pointerup", release);
-    root.addEventListener("pointercancel", release);
-    root.addEventListener("pointerleave", function (ev) { if (!hold && ev.pointerType === "mouse") showHint(null); });
-    // after a drag or an edge tap, the click that follows must not also follow a link
-    root.addEventListener("click", function (ev) {
-      if (swallow) { swallow = false; ev.preventDefault(); ev.stopPropagation(); }
-    }, true);
-
-    fit();
     var t = /^#p(\d+)$/.exec(location.hash);
-    if (t) {
-      var i = Math.max(0, Math.min(pages.length - 1, +t[1] - 1));
-      if (book) show(view(i)); else { mark(i); pages[i].scrollIntoView(); }
-    }
-    var timer;
-    window.addEventListener("resize", function () { clearTimeout(timer); timer = setTimeout(function () { if (!busy) fit(); }, 100); });
+    if (t) at = Math.max(0, Math.min(pages.length - 1, +t[1] - 1));
+    fit();
+    if (t && !flip) pages[at].scrollIntoView();
+    var timer, lastW = document.documentElement.clientWidth, lastH = window.innerHeight;
+    window.addEventListener("resize", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var w = document.documentElement.clientWidth, h = window.innerHeight;
+        if (w === lastW && h === lastH) return;
+        lastW = w; lastH = h;
+        fit();
+      }, 150);
+    });
     window.addEventListener("hashchange", function () {
       var m = /^#p(\d+)$/.exec(location.hash);
       if (m) go(+m[1] - 1);
@@ -328,7 +272,7 @@
     links.forEach(function (a, k) { a.addEventListener("click", function (ev) { ev.preventDefault(); go(k); }); });
     document.addEventListener("keydown", function (ev) {
       if (ev.metaKey || ev.ctrlKey || ev.altKey || /INPUT|TEXTAREA/.test(ev.target.tagName)) return;
-      if (ev.key === "j" || ev.key === "ArrowRight" || ev.key === "PageDown" || ev.key === " ") { step(true); ev.preventDefault(); }
+      if (ev.key === "j" || ev.key === "ArrowRight" || ev.key === "PageDown" || (flip && ev.key === " ")) { step(true); ev.preventDefault(); }
       else if (ev.key === "k" || ev.key === "ArrowLeft" || ev.key === "PageUp") { step(false); ev.preventDefault(); }
       else if (ev.key === "Home") { go(0); }
       else if (ev.key === "End") { go(pages.length - 1); }
@@ -336,6 +280,9 @@
       else if (/^[1-8]$/.test(ev.key)) { go(+ev.key - 1); }
     });
 
+    // print the plain pages, not the book
+    window.addEventListener("beforeprint", function () { if (flip) { unbook(); document.body.classList.remove("cx-book"); } });
+    window.addEventListener("afterprint", fit);
     if (/[?&]print=1/.test(location.search)) {
       history.replaceState(null, "", location.pathname);
       setTimeout(function () { window.print(); }, 300);

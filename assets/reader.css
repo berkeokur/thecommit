@@ -21,39 +21,19 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .cx-print{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .cx-print:hover{background:var(--paper);border-color:var(--paper)}
 .cx-bar :focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
-/* the book: facing pages in one grid row, only the pages in view shown, turned by reader.js */
+/* the book: StPageFlip turns sheets in a box sized to the window; each sheet holds one fixed page */
 body.cx-book{overflow:hidden}
-.cx-book #root{display:grid;grid-template-rows:auto;justify-content:center;align-content:center;overflow:hidden}
-.cx-book .page{grid-row:1;margin:0!important;visibility:hidden;position:relative;z-index:0;backface-visibility:hidden}
-.cx-book .page.cx-under{visibility:visible;z-index:1}
-.cx-book .page.cx-on{visibility:visible;z-index:2}
-.cx-book .page.cx-over{visibility:visible;z-index:3}
-.cx-two .page:nth-child(odd){box-shadow:inset -14px 0 18px -14px rgba(17,18,20,.22),0 1px 2px rgba(17,18,20,.12),0 6px 18px rgba(17,18,20,.10)}
-.cx-two .page:nth-child(even){box-shadow:inset 14px 0 18px -14px rgba(17,18,20,.22),0 1px 2px rgba(17,18,20,.12),0 6px 18px rgba(17,18,20,.10)}
-/* the turning sheet: nested strips, each with a front and a back face, shaded as they tilt */
-.cx-leaf{position:fixed;z-index:9;pointer-events:none}
-.cx-strip{position:absolute;top:0;transform-style:preserve-3d;will-change:transform}
-.cx-face{position:absolute;top:0;bottom:0;left:-.5px;right:-.5px;overflow:hidden;background:var(--paper);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.cx-back{transform:rotateY(180deg)}
-.cx-at{position:absolute;top:0;margin-left:.5px}
-.cx-book .cx-at .page{position:relative;visibility:visible;margin:0!important;box-shadow:none!important}
-.cx-shade{position:absolute;inset:0;background:#111214;opacity:0}
-.cx-cast{position:absolute;inset:0;opacity:0;background:linear-gradient(90deg,rgba(17,18,20,.28),rgba(17,18,20,.08) 45%,transparent 75%)}
-.cx-cast-r{background:linear-gradient(270deg,rgba(17,18,20,.28),rgba(17,18,20,.08) 45%,transparent 75%)}
-/* horizontal drags turn pages; vertical pans and pinch-zoom stay with the browser */
-.cx-book #root{touch-action:pan-y pinch-zoom}
-.cx-dragging,.cx-dragging *{user-select:none;-webkit-user-select:none;cursor:grabbing!important}
-/* the outer edge of a page, under the mouse: a fold of shadow that says it turns */
-.cx-edge{position:fixed;z-index:8;pointer-events:none;opacity:0;transition:opacity .15s;background:linear-gradient(270deg,rgba(17,18,20,.16),rgba(17,18,20,0))}
-.cx-edge-l{background:linear-gradient(90deg,rgba(17,18,20,.16),rgba(17,18,20,0))}
-.cx-edge.on{opacity:1}
+.cx-book #root{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cx-flip{flex:none;box-shadow:0 1px 2px rgba(17,18,20,.12),0 6px 18px rgba(17,18,20,.10)}
+.cx-sheet{overflow:hidden;background:var(--paper)}
+.cx-book .cx-sheet .page{margin:0!important;box-shadow:none}
 .cx-turn{position:fixed;top:50%;z-index:20;width:44px;height:72px;margin-top:-36px;border:0;background:var(--ink);color:var(--paper);font:400 34px/1 var(--sans);cursor:pointer;opacity:.82}
 .cx-turn:hover{opacity:1;background:var(--accent);color:var(--on-accent)}
 .cx-turn:disabled{opacity:.15;cursor:default;background:var(--ink);color:var(--paper)}
 .cx-turn:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
 .cx-turn-prev{left:12px}.cx-turn-next{right:12px}
-/* the turn buttons and edge hints belong to the book; narrow screens scroll */
-body:not(.cx-book) .cx-turn,body:not(.cx-book) .cx-edge{display:none}
+/* the turn buttons belong to the book; narrow screens scroll */
+body:not(.cx-book) .cx-turn{display:none}
 .page{scroll-margin-top:72px}
 /* layout checks are for the press, not for readers with other fonts */
 #warn{display:none!important}
@@ -74,8 +54,6 @@ body:not(.cx-book) .cx-turn,body:not(.cx-book) .cx-edge{display:none}
   .page{scroll-margin-top:96px;margin:12px auto!important}
 }
 @media print{
-  .cx-bar,.cx-turn,.cx-edge,.cx-leaf{display:none!important}
-  body.cx-book{overflow:visible}
-  .cx-book #root{display:block;height:auto!important}
-  .page{zoom:1!important;box-shadow:none!important;visibility:visible!important;transform:none!important}
+  .cx-bar,.cx-turn{display:none!important}
+  .page{zoom:1!important;box-shadow:none!important}
 }
