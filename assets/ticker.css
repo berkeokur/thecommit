@@ -1,0 +1,39 @@
+.tk{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:stretch;height:36px;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:13px;line-height:16px}
+.tk[hidden]{display:none}
+.tk-label{flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--paper);color:var(--ink);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tk-label i{display:inline-block;width:7px;height:12px;background:var(--accent);animation:none}
+.tk-view{position:relative;flex:1;min-width:0;overflow:hidden;display:flex;align-items:center}
+.tk-view::after{content:"";position:absolute;inset:0 0 0 auto;width:32px;background:linear-gradient(90deg,transparent,var(--ink));pointer-events:none}
+.tk-track{display:flex;flex:none;white-space:nowrap;animation:tk-slide var(--tk-dur,40s) linear infinite;will-change:transform}
+.tk-run{display:flex;flex:none}
+.tk-item{display:flex;align-items:baseline;gap:10px;padding:0 0 0 18px}
+.tk-item::after{content:"";align-self:center;width:6px;height:6px;margin-left:8px;background:var(--accent-light)}
+.tk-item time{color:var(--accent-light);font-weight:600}
+.tk-calm .tk-item time{color:#B9BBBF}
+.tk-item a{color:inherit;text-decoration:none}
+.tk-item a:hover,.tk-item a:focus-visible{text-decoration:underline;text-decoration-color:var(--accent-light);text-underline-offset:3px}
+.tk a:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
+.tk-mkt{gap:8px}
+.tk-mkt time,.tk-calm .tk-mkt time{color:var(--accent-light);text-transform:uppercase;letter-spacing:.06em}
+.tk-mkt .tk-note{color:#B9BBBF}
+.tk-q{gap:8px}
+.tk-q b{font-weight:600}
+.tk-q .px{color:#B9BBBF}
+.tk-q .up{color:#3DD68C;font-weight:600}
+.tk-q .down{color:#FF6B6B;font-weight:600}
+.tk:hover .tk-track,.tk:focus-within .tk-track{animation-play-state:paused}
+@keyframes tk-slide{to{transform:translateX(-50%)}}
+body:has(> .tk:not([hidden])){padding-bottom:36px}
+@media (max-width:640px){
+  .tk{height:32px;font-size:12px}
+  .tk-label{padding:0 10px;letter-spacing:.08em}
+  body:has(> .tk:not([hidden])){padding-bottom:32px}
+}
+/* no motion wanted: the headlines sit still and the view scrolls sideways by hand */
+@media (prefers-reduced-motion:reduce){
+  .tk-track{animation:none}
+  .tk-label i{animation:none}
+  .tk-run[aria-hidden]{display:none}
+  .tk-view{overflow-x:auto}
+}
+@media print{.tk{display:none!important}body{padding-bottom:0}}
