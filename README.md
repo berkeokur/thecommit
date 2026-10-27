@@ -5,8 +5,11 @@
 </p>
 
 <p align="center">
-  <b>Technology news, explained in plain language. Eight pages, twice a week. Free.</b><br>
-  <a href="https://berkeokur.github.io/thecommit/"><b>Read the latest issue →</b></a>
+  <b>Technology news, explained in plain language. Eight pages, twice a week. Free.</b>
+</p>
+
+<p align="center">
+  <a href="https://berkeokur.github.io/thecommit/"><img src=".github/readme/button-website.png" alt="Visit the website" width="280"></a>
 </p>
 
 ---
@@ -75,7 +78,8 @@ Scripts gather the news; AI picks and writes, working only from the pages the sc
 The Commit is **free to read**: no paywall, no sign-up, no ads, no tracking. Read it in the browser or download the PDFs and print them (A4, 100%, double-sided, flip on the long edge).
 
 <p align="center">
-  <a href="https://berkeokur.github.io/thecommit/"><b>berkeokur.github.io/thecommit</b></a>
+  <a href="https://berkeokur.github.io/thecommit/"><img src=".github/readme/button-website.png" alt="Visit the website" width="280"></a><br>
+  <sub>berkeokur.github.io/thecommit</sub>
 </p>
 
 ## About this repository
