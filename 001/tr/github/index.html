@@ -172,17 +172,32 @@ p{text-wrap:pretty}
 .ghcompact .ghrow .n,.ghcompact .ghrow .lang,.ghcompact .ghrow .stars,.ghcompact .ghrow .gain{font-size:12px;line-height:18px}
 .ghcompact .ghrow .gain{padding:0 5px}
 .ghcompact .ghrow .about{margin-top:1px;font-size:13px;line-height:1.2}
-.ghdives{margin-top:20px;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px}
-.ghdive{min-height:0;overflow:hidden}
+.ghdives{margin-top:20px;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);column-gap:36px;row-gap:0}
+.ghdive{grid-row:span 2;min-height:0;overflow:hidden;display:grid;grid-template-rows:subgrid}
+.ghdive .rest{min-height:0}
 .ghdives{background:linear-gradient(var(--hair),var(--hair)) center / 1px 100% no-repeat}
-.ghdive .project{font-family:var(--mono);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
-.ghdive .project a{text-decoration:underline;text-decoration-color:var(--hair);text-underline-offset:3px}
 .ghdive h3{margin-top:10px;font-size:24px;line-height:1.12;font-weight:600;letter-spacing:-.02em}
-.ghdive .intro{margin-top:10px;font-size:16px;line-height:1.4;color:var(--graphite)}
-.ghdive .selection{margin:8px 0;padding:6px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);font-size:13px;line-height:1.4}
-.ghdive .selection b{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.ghdive .intro{margin:10px 0 8px;font-size:16px;line-height:1.4;color:var(--graphite)}
 .ghdive .prose p{margin-bottom:10px;font-size:14px;line-height:1.35}
 .ghdive .src{margin-top:6px;font-size:11px}
+/* each deep dive opens with a macOS Terminal window (dark appearance); both windows share one height */
+.ghdive .win{border-radius:10px;overflow:hidden;background:#1E1E1E;color:#E6E6E6;border:.5px solid #000;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.12),0 8px 22px rgba(17,18,20,.22);font-family:var(--mono);font-size:11px;line-height:16px}
+.ghdive .win .bar{position:relative;display:flex;align-items:center;height:26px;padding:0 10px;background:linear-gradient(#3B3B3D,#323234);border-bottom:.5px solid #000}
+.ghdive .win .lights{display:flex;gap:8px;flex:none;position:relative;z-index:1}
+.ghdive .win .lights i{width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.25)}
+.ghdive .win .lights i:nth-child(1){background:#FF5F57}.ghdive .win .lights i:nth-child(2){background:#FEBC2E}.ghdive .win .lights i:nth-child(3){background:#28C840}
+.ghdive .win .title{position:absolute;left:76px;right:12px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,var(--sans);font-size:11.5px;font-weight:500;color:#B5B5B7}
+.ghdive .win .title a{color:#E6E6E6;font-weight:600;text-decoration:none}
+.ghdive .win .title em{font-style:normal;color:var(--accent-light)}
+.ghdive .win .body{padding:7px 10px 8px}
+.ghdive .win .body p{overflow-wrap:anywhere}
+.ghdive .win .ps{color:#8E8E93}
+.ghdive .win .cm{color:#7FB27F}
+.ghdive .win .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ghdive .win .cur{display:inline-block;width:7px;height:14px;margin-left:1px;vertical-align:-3px;background:#BDBDBD}
+.ghdive .rest h3{margin-top:10px}
+@media screen{.ghdive .win .cur{animation:blink 1.1s steps(1) infinite}}
+@keyframes blink{50%{opacity:0}}
 
 .footer-wrap{margin-top:auto;padding-top:18px;flex-shrink:0}
 /* last page of each edition: the footer becomes an ink colophon band, as on the promo poster; same height as the rule-and-text footer */
@@ -1230,12 +1245,20 @@ a.lk{color:inherit;text-decoration:none}
       var essays = h("section", "ghdives", dives.map(function (item, i) {
         var repo = d.repos.find(function (r) { return r.full_name.toLowerCase() === item.full_name.toLowerCase(); });
         var essay = h("article", "ghdive", [
-          h("div", "project", [link(repo.url, [repo.full_name])]),
-          h("h3", null, [item.headline]),
-          h("p", "intro", [item.standfirst]),
-          h("p", "selection", [h("b", null, [t("Why this repo · ")]), item.why_selected]),
-          h("div", "prose", item.paragraphs.map(function (p) { return h("p", null, [p]); })),
-          h("p", "meta src", [link(repo.url, [t("Source: project README")])])
+          h("div", "win", [
+            h("div", "bar", [h("span", "lights", [h("i"), h("i"), h("i")]),
+              h("span", "title", [link(repo.url, [repo.full_name.split("/")[1]]),
+                (repo.language ? " \u2014 " + repo.language : "") + " \u2014 ", h("em", null, ["+" + k(repo.stars_gained) + " \u2605"])])]),
+            h("div", "body", [
+              h("p", "cm", [h("span", "ps", ["~ % "]), "# ", h("span", "sr", [t("Why this repo · ")]), item.why_selected]),
+              h("p", null, [h("span", "ps", ["~ % "]), "gh repo clone " + repo.full_name, h("span", "cur")])])
+          ]),
+          h("div", "rest", [
+            h("h3", null, [item.headline]),
+            h("p", "intro", [item.standfirst]),
+            h("div", "prose", item.paragraphs.map(function (p) { return h("p", null, [p]); })),
+            h("p", "meta src", [link(repo.url, [t("Source: project README")])])
+          ])
         ]);
         essay.setAttribute("aria-label", "Deep dive: " + item.full_name);
         return fit(essay, "GitHub deep dive " + (i + 1));
