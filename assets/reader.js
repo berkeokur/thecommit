@@ -24,6 +24,12 @@
     var at = 0, flip = null;  // the current page (first of the spread in the book); the book, while shown
     var aim = null;  // while picking a story to read (below): the story under a press, or "miss"
     var canBook = pages.length > 1 && window.St && window.St.PageFlip;
+    // Switching language keeps the reader on the same page.
+    document.querySelectorAll(".cx-language").forEach(function (link) {
+      link.addEventListener("click", function () {
+        link.setAttribute("href", link.getAttribute("href").split("#")[0] + (/^#p\d+$/.test(location.hash) ? location.hash : "#p" + (at + 1)));
+      });
+    });
 
     function mark(i, per) {
       at = i;
