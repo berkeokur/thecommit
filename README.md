@@ -62,16 +62,13 @@ So I built one. It started as a personal paper I print at home twice a week, and
 
 ## How it's made
 
-The Commit is **written by AI** and says so on every issue. Behind it is a small pipeline that runs on a home server:
+The Commit is **written by AI** and says so on every issue. A small pipeline on a home server makes each one:
 
-1. **Collect.** Scripts gather candidate stories from a fixed list of sources (Ars Technica, The Verge, The Register, MIT Technology Review, Rest of World, Krebs on Security, TrendForce, Semiconductor Engineering, EE Times, BBC, Al Jazeera, NPR and others) and the week's trending repositories.
-2. **Pick.** An AI editor chooses the stories for each slot. It never browses the web itself; it only sees what was collected.
-3. **Fetch.** Scripts read the chosen articles. These pages are the *only* material the writer may use.
-4. **Write.** A fresh AI session writes the issue to strict word budgets, attributing company claims, forecasts and contested figures, and never inventing numbers or quotes.
-5. **Check.** A validator enforces structure, word counts, dates and repository figures. A separate fact check looks for every number, quotation, version and product name in that story's own source. An issue with an unresolved flag is **held off the website** until it has been reviewed by hand.
-6. **Publish.** The issue is typeset into print-ready PDFs and published here, in **English and Turkish**.
+<p align="center">
+  <img src=".github/readme/pipeline.png" alt="Pipeline: Collect (script) → Pick (AI) → Fetch (script) → Write (AI) → Check (rules and fact check) → Publish (PDF, web, English and Turkish). Flagged issues are held and reviewed by hand before publishing." width="100%">
+</p>
 
-Every story links to its source, so you can always check the original.
+Scripts gather the news; AI picks and writes, working only from the pages the scripts collected; every number and quote is checked against its source before an issue goes online. Every story links to that source, so you can always read the original.
 
 ## It's free
 
