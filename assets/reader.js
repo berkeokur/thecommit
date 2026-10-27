@@ -22,6 +22,7 @@
     document.body.appendChild(prevBtn); document.body.appendChild(nextBtn);
 
     var at = 0, flip = null;  // the current page (first of the spread in the book); the book, while shown
+    var aim = null;  // while picking a story to read (below): the story under a press, or "miss"
     var canBook = pages.length > 1 && window.St && window.St.PageFlip;
 
     function mark(i, per) {
@@ -192,7 +193,7 @@
         return function (pos) { if (!fc.checkState("flipping")) fold(pos); };  // a turn in progress finishes first
       })(fc.fold);
       fc.flip = function (pos) {
-        if (fc.checkState("flipping")) return;
+        if (fc.checkState("flipping") || aim) return;  // while picking a story, a click on the page picks
         if (mode === "corner" && fc.getCalculation()) { settle(true); return; }
         // a click, button or key: lift the corner a little, then glide it over like a release
         halt(); freeze();
@@ -238,7 +239,12 @@
       });
       box.addEventListener("mouseleave", function () { show(0); });
       flip.on("changeState", function (e) { if (e.data !== "read") show(0); });
+      onEdge = function (ev) {
+        var r = box.getBoundingClientRect(), x = ev.clientX - r.left;
+        return x > r.width - band && at + 2 < pages.length || x < band && at > 0;
+      };
     }
+    var onEdge = function () { return false; };  // whether a click there turns the page; set by edges()
 
     // zoom only after the template has measured and fixed its boxes at full size
     function fit() {
@@ -306,6 +312,223 @@
       else if (ev.key === "p") { window.print(); }
       else if (/^[1-8]$/.test(ev.key)) { go(+ev.key - 1); }
     });
+
+    // Read a story: picked with the Read tool, it opens in a panel over the pages, reflowed in one
+    // column at a size set by the reader. The arrows walk through the paper story by story; closing
+    // lands on the last story's page.
+    var tr = document.documentElement.lang === "tr";
+    var say = function (en, t) { return tr ? t : en; };
+    var STORY = ".page article.story, .page .grid2 > .card, .page aside.joke, .page article.ghdive, .page .ghrow";
+    var stories = Array.prototype.slice.call(document.querySelectorAll(STORY));
+    var SIZES = [16, 18, 20, 23, 26], size = 2, reading = -1, before = null, down = null;
+    try { var kept = +localStorage.getItem("cx-read-size"); if (kept >= 0 && kept < SIZES.length) size = kept; } catch (_) {}
+
+    var panel = document.createElement("div");
+    panel.className = "cx-read"; panel.hidden = true;
+    panel.setAttribute("role", "dialog"); panel.setAttribute("aria-modal", "true"); panel.setAttribute("aria-label", say("Story", "Haber"));
+    panel.innerHTML = '<div class="cx-read-card"><div class="cx-read-bar">' +
+      '<span class="cx-read-where"></span><span class="cx-sp"></span>' +
+      '<button type="button" class="cx-read-btn" data-do="smaller" aria-label="' + say("Smaller text", "Daha küçük yazı") + '">A−</button>' +
+      '<button type="button" class="cx-read-btn" data-do="larger" aria-label="' + say("Larger text", "Daha büyük yazı") + '">A+</button>' +
+      '<button type="button" class="cx-read-btn" data-do="prev" aria-label="' + say("Previous story", "Önceki haber") + '">‹</button>' +
+      '<button type="button" class="cx-read-btn" data-do="next" aria-label="' + say("Next story", "Sonraki haber") + '">›</button>' +
+      '<button type="button" class="cx-read-btn cx-read-x" data-do="close" aria-label="' + say("Close", "Kapat") + '">×</button>' +
+      '</div><div class="cx-read-story"></div></div>';
+    document.body.appendChild(panel);
+    var card = panel.querySelector(".cx-read-card"), body = panel.querySelector(".cx-read-story");
+    var where = panel.querySelector(".cx-read-where");
+    function btn(name) { return panel.querySelector('[data-do="' + name + '"]'); }
+
+    // a copy of the story without the page's fitting: inline sizes, column wrappers, section heads
+    function copy(s) {
+      var out = document.createDocumentFragment();
+      if (s.classList.contains("ghrow")) {
+        var name = s.querySelector(".name"), h = document.createElement("h3"), meta = document.createElement("span");
+        h.appendChild(name.cloneNode(true));
+        meta.className = "meta";
+        meta.textContent = [".lang", ".stars", ".gain"].map(function (c) { var e = s.querySelector(c); return e ? e.textContent : ""; })
+          .filter(Boolean).join(" · ");
+        out.appendChild(h); out.appendChild(meta);
+        var about = s.querySelector(".about");
+        if (about) out.appendChild(about.cloneNode(true));
+        return out;
+      }
+      var c = s.cloneNode(true);
+      while (c.firstChild) out.appendChild(c.firstChild);
+      Array.prototype.forEach.call(out.querySelectorAll(".sechead"), function (n) { n.remove(); });
+      Array.prototype.forEach.call(out.querySelectorAll(".cols"), function (n) { n.replaceWith.apply(n, n.childNodes); });
+      Array.prototype.forEach.call(out.querySelectorAll("[style], [id], [data-fit]"), function (n) {
+        n.removeAttribute("style"); n.removeAttribute("id"); n.removeAttribute("data-fit");
+      });
+      return out;
+    }
+    function resize(by) {
+      size = Math.max(0, Math.min(SIZES.length - 1, size + by));
+      card.style.fontSize = SIZES[size] + "px";
+      btn("smaller").disabled = size === 0;
+      btn("larger").disabled = size === SIZES.length - 1;
+      try { localStorage.setItem("cx-read-size", size); } catch (_) {}
+    }
+    function show(i) {
+      reading = i;
+      var s = stories[i], pg = pages.indexOf(s.closest(".page"));
+      body.textContent = "";
+      body.appendChild(copy(s));
+      where.textContent = say("Page ", "Sayfa ") + (pg + 1) + " · " + (i + 1) + " / " + stories.length;
+      btn("prev").disabled = i === 0;
+      btn("next").disabled = i === stories.length - 1;
+      panel.scrollTop = 0;
+    }
+    function open(i) {
+      if (!stories.length) return;
+      if (reading < 0) {
+        before = document.activeElement;
+        panel.hidden = false;
+        document.body.classList.add("cx-reading");
+        void panel.offsetWidth;  // lay it out hidden first, so it fades in
+        panel.classList.add("on");
+      }
+      show(Math.max(0, Math.min(stories.length - 1, i)));
+      btn("close").focus({ preventScroll: true });
+    }
+    function close() {
+      if (reading < 0) return;
+      var pg = pages.indexOf(stories[reading].closest(".page"));
+      reading = -1;
+      panel.classList.remove("on"); panel.hidden = true;
+      document.body.classList.remove("cx-reading");
+      if (before && before.focus) before.focus({ preventScroll: true });
+      if (flip ? pg - pg % 2 !== at : pg !== at) go(pg);
+    }
+    // The book lays a layer over its pages, so the story is found by where the pointer is.
+    function inside(el, ev) {
+      var r = el.getBoundingClientRect();
+      return ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+    }
+    function storyAt(ev) {
+      if (!root.contains(ev.target) || ev.target.closest("a, button") || (flip && (flip.getState() !== "read" || onEdge(ev)))) return null;
+      for (var k = 0; k < stories.length; k++) {
+        var s = stories[k], pg = pages.indexOf(s.closest(".page"));
+        if (flip && pg - pg % 2 !== at || !inside(s, ev)) continue;
+        return Array.prototype.some.call(s.querySelectorAll("a[href]"), function (a) { return inside(a, ev); }) ? null : s;
+      }
+      return null;
+    }
+    resize(0);
+    panel.addEventListener("click", function (ev) {
+      var act = ev.target.closest("[data-do]");
+      if (!card.contains(ev.target)) { close(); return; }
+      if (!act) return;
+      ({ smaller: function () { resize(-1); }, larger: function () { resize(1); }, close: close,
+         prev: function () { show(reading - 1); }, next: function () { show(reading + 1); } })[act.dataset.do]();
+    });
+    // Picking: after the Read tool, the story under the pointer is marked and a click opens it. A click
+    // elsewhere on the pages, Esc or the tool again stops picking; the book's edges still turn pages.
+    var picking = false, readBtn = null, hot = null;
+    function light(s) {
+      if (s === hot) return;
+      if (hot) hot.classList.remove("cx-hot");
+      hot = s;
+      if (hot) hot.classList.add("cx-hot");
+    }
+    function pick(on) {
+      picking = on;
+      document.body.classList.toggle("cx-picking", on);
+      if (!on) light(null);
+      if (readBtn) {
+        var tip = on ? say("Click a story · Esc to cancel", "Bir habere tıklayın · İptal için Esc") : say("Read in large type · R", "Büyük yazıyla oku · R");
+        readBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        readBtn.setAttribute("aria-label", tip); readBtn.dataset.tip = tip;
+      }
+    }
+    document.addEventListener("pointerdown", function (ev) {
+      down = { x: ev.clientX, y: ev.clientY };
+      aim = picking && ev.button === 0 && root.contains(ev.target) && !(flip && onEdge(ev)) ? storyAt(ev) || "miss" : null;
+    }, true);
+    document.addEventListener("pointerup", function () { setTimeout(function () { aim = null; }, 0); }, true);
+    root.addEventListener("click", function (ev) {
+      var s = aim;
+      aim = null;
+      if (!s || (down && Math.abs(ev.clientX - down.x) + Math.abs(ev.clientY - down.y) > 6)) return;
+      pick(false);
+      if (s === "miss") return;
+      ev.preventDefault();
+      open(stories.indexOf(s));
+    });
+    root.addEventListener("mousemove", function (ev) { if (picking) light(storyAt(ev)); });
+    root.addEventListener("mouseleave", function () { light(null); });
+    window.addEventListener("keydown", function (ev) {
+      if (picking && ev.key === "Escape") { pick(false); ev.preventDefault(); return; }
+      if (reading < 0) return;
+      var k = ev.key, used = true;
+      if (k === "Escape") close();
+      else if (k === "ArrowRight" || k === "j") { if (reading < stories.length - 1) show(reading + 1); }
+      else if (k === "ArrowLeft" || k === "k") { if (reading > 0) show(reading - 1); }
+      else if (k === "+" || k === "=") resize(1);
+      else if (k === "-" || k === "_") resize(-1);
+      else if (k === "Tab") {  // keep focus inside the panel
+        var f = Array.prototype.filter.call(card.querySelectorAll("button:not(:disabled), a[href]"), function (e) { return e.offsetParent; });
+        var a = f.indexOf(document.activeElement);
+        if (ev.shiftKey ? a <= 0 : a === f.length - 1) f[ev.shiftKey ? f.length - 1 : 0].focus();
+        else used = false;
+      }
+      else if (/^(PageUp|PageDown|Home|End| )$/.test(k)) { ev.stopImmediatePropagation(); return; }  // scroll the story, not the pages
+      else used = /^[1-8p]$/.test(k);
+      if (used) { ev.preventDefault(); ev.stopImmediatePropagation(); }
+    }, true);
+
+    // Reading tools: a column of icons in the margin beside the pages, each named on hover.
+    // Read starts picking a story to open; Full screen gives the pages the whole display.
+    if (stories.length) {
+      var ICON = {
+        read: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/>',
+        full: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>',
+        exit: '<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>'
+      };
+      var svg = function (name) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="square" aria-hidden="true">' + ICON[name] + "</svg>";
+      };
+      var rail = document.createElement("div");
+      rail.className = "cx-rail";
+      rail.setAttribute("role", "toolbar"); rail.setAttribute("aria-orientation", "vertical");
+      rail.setAttribute("aria-label", say("Reading tools", "Okuma araçları"));
+      var tool = function (name, tip, act) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "cx-tool";
+        b.innerHTML = svg(name);
+        b.setAttribute("aria-label", tip); b.dataset.tip = tip;
+        b.addEventListener("click", act);
+        rail.appendChild(b);
+        return b;
+      };
+      readBtn = tool("read", "", function () { pick(!picking); });
+      pick(false);
+      var full = document.documentElement;
+      if (document.fullscreenEnabled && full.requestFullscreen) {
+        var fsBtn = tool("full", "", function () {
+          if (document.fullscreenElement) document.exitFullscreen(); else full.requestFullscreen().catch(function () {});
+        });
+        fsBtn.classList.add("cx-fs");
+        var label = function () {
+          var on = !!document.fullscreenElement, tip = on ? say("Exit full screen · F", "Tam ekrandan çık · F") : say("Full screen · F", "Tam ekran · F");
+          fsBtn.innerHTML = svg(on ? "exit" : "full");
+          fsBtn.setAttribute("aria-label", tip); fsBtn.dataset.tip = tip;
+          fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        };
+        label();
+        document.addEventListener("fullscreenchange", label);
+      }
+      document.body.appendChild(rail);
+      var place = function () { if (bar) rail.style.top = bar.offsetHeight + 16 + "px"; };
+      place();
+      window.addEventListener("resize", place);
+      document.addEventListener("keydown", function (ev) {
+        if (reading >= 0 || ev.metaKey || ev.ctrlKey || ev.altKey || /INPUT|TEXTAREA/.test(ev.target.tagName)) return;
+        if (ev.key === "r") { pick(!picking); ev.preventDefault(); }
+        else if (ev.key === "f" && fsBtn) fsBtn.click();
+      });
+    }
 
     // print the plain pages, not the book
     window.addEventListener("beforeprint", function () { if (flip) { unbook(); document.body.classList.remove("cx-book"); } });

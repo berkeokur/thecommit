@@ -40,6 +40,47 @@ body.cx-book{overflow:hidden}
 /* the turn buttons belong to the book; narrow screens scroll */
 body:not(.cx-book) .cx-turn{display:none}
 .page{scroll-margin-top:72px}
+/* after the Read tool, the story under the pointer is marked; a click opens it in a panel in one column */
+@media (hover:hover){.cx-hot{cursor:zoom-in;background:rgba(30,63,216,.07);box-shadow:0 0 0 6px rgba(30,63,216,.07)}}
+/* reading tools: a column of icons in the right margin, named on hover; at the foot on narrow screens */
+.cx-rail{position:fixed;right:12px;top:72px;z-index:20;display:flex;flex-direction:column;gap:6px}
+.cx-tool{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;background:var(--ink);color:var(--paper);cursor:pointer;opacity:.82}
+.cx-tool:hover,.cx-tool:focus-visible{opacity:1;background:var(--accent);color:var(--on-accent)}
+.cx-tool:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
+.cx-tool[aria-pressed="true"]{opacity:1;background:var(--accent);color:var(--on-accent)}
+.cx-tool::after{content:attr(data-tip);position:absolute;right:calc(100% + 8px);top:50%;transform:translate(4px,-50%);padding:6px 9px;background:var(--ink);color:var(--paper);font:600 11px/14px var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s ease,transform .15s ease}
+.cx-tool:hover::after,.cx-tool:focus-visible::after{opacity:1;transform:translate(0,-50%)}
+body:not(.cx-book) .cx-rail{top:auto!important;bottom:16px;right:16px}
+body:not(.cx-book) .cx-tool{box-shadow:0 2px 8px rgba(17,18,20,.25);opacity:1}
+@media (hover:none){.cx-tool::after{display:none}}
+body.cx-reading{overflow:hidden}
+.cx-read{position:fixed;inset:0;z-index:100;overflow-y:auto;overscroll-behavior:contain;padding:40px 16px 64px;background:rgba(17,18,20,.6);opacity:0;transition:opacity .18s ease}
+.cx-read.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.cx-read{transition:none}}
+.cx-read[hidden]{display:none}
+.cx-read-card{max-width:680px;margin:0 auto;background:var(--paper);color:var(--ink);font-family:var(--sans);box-shadow:0 10px 40px rgba(17,18,20,.35)}
+.cx-read-bar{position:sticky;top:-40px;z-index:1;display:flex;align-items:center;gap:6px;padding:10px 12px 10px 20px;background:var(--ink);color:#B9BBBF;font:600 12px/16px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.cx-read-btn{min-width:34px;height:30px;padding:0 8px;border:1px solid #55585E;background:transparent;color:var(--paper);font:600 14px/1 var(--mono);cursor:pointer}
+.cx-read-btn:hover{border-color:var(--paper)}
+.cx-read-btn:disabled{opacity:.3;cursor:default;border-color:#55585E}
+.cx-read-x{margin-left:6px;font-size:20px}
+.cx-read-btn:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
+.cx-read-story{padding:32px 44px 44px}
+.cx-read-story .kicker{display:inline-block;margin-bottom:6px}
+.cx-read-story h2,.cx-read-story h3{margin:.3em 0 .45em;font:700 1.7em/1.18 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.cx-read-story h3 a{color:inherit;text-decoration:none}
+.cx-read-story .deck,.cx-read-story .stand{margin:0 0 .9em;font-size:1.2em;line-height:1.45;color:var(--graphite)}
+.cx-read-story p,.cx-read-story blockquote{margin:0 0 1em;font-size:1em;line-height:1.62}
+.cx-read-story blockquote,.cx-read-story figure{margin:1.2em 0;padding-left:.9em;border-left:3px solid var(--accent);font-size:1.15em}
+.cx-read-story .meta{display:block;margin:0 0 1.4em;font:600 12px/16px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--graphite)}
+.cx-read-story .meta .region{color:var(--ink)}
+.cx-read-story a.lk{color:var(--accent)}
+@media (max-width:640px){
+  .cx-read{padding:0}
+  .cx-read-bar{top:0;padding-left:14px}
+  .cx-read-story{padding:22px 18px 40px}
+  .cx-fs{display:none}
+}
 /* layout checks are for the press, not for readers with other fonts */
 #warn{display:none!important}
 .overflow{outline:0!important}
@@ -59,6 +100,7 @@ body:not(.cx-book) .cx-turn{display:none}
   .page{scroll-margin-top:96px;margin:12px auto!important}
 }
 @media print{
-  .cx-bar,.cx-turn{display:none!important}
+  .cx-bar,.cx-turn,.cx-read,.cx-rail{display:none!important}
+  .cx-hot{background:none!important;box-shadow:none!important}
   .page{zoom:1!important;box-shadow:none!important}
 }
