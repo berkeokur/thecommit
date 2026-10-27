@@ -71,6 +71,7 @@
       });
       flip.loadFromHTML(sheets);
       soften(flip, box);
+      edges(flip, box, pw);
       flip.on("flip", function (e) {
         mark(e.data - e.data % 2, 2);
         history.replaceState(null, "", "#p" + (at + 1));
@@ -211,6 +212,32 @@
         el.style.background = "linear-gradient(" + dir[1] + ", rgba(17,18,20," + (o * 0.55).toFixed(3) + ") 0%, rgba(17,18,20," +
           (o * 0.22).toFixed(3) + ") 22%, rgba(17,18,20,0) 70%)";
       };
+    }
+
+    // A gray shade fades in along the book's outer edge under the mouse, where a click turns the
+    // page, and the pointer becomes a hand. Edges with no page to turn to stay plain, and the shade
+    // gives way while a corner is lifted or a page is turning.
+    function edges(flip, box, pw) {
+      var band = Math.max(28, pw * 0.08);
+      var shades = ["l", "r"].map(function (side) {
+        var el = document.createElement("div");
+        el.className = "cx-edge cx-edge-" + side;
+        el.style.width = band + "px";
+        box.appendChild(el);
+        return el;
+      });
+      function show(side) {
+        shades[0].classList.toggle("on", side < 0);
+        shades[1].classList.toggle("on", side > 0);
+        box.style.cursor = side ? "pointer" : "";
+      }
+      box.addEventListener("mousemove", function (ev) {
+        var r = box.getBoundingClientRect(), x = ev.clientX - r.left;
+        var side = x > r.width - band && at + 2 < pages.length ? 1 : x < band && at > 0 ? -1 : 0;
+        show(flip.getState() === "read" ? side : 0);
+      });
+      box.addEventListener("mouseleave", function () { show(0); });
+      flip.on("changeState", function (e) { if (e.data !== "read") show(0); });
     }
 
     // zoom only after the template has measured and fixed its boxes at full size
