@@ -1,0 +1,19 @@
+The Commit No. 001 · Tuesday 27 October 2026
+
+Google opens personal AI data to ad targeting
+Connecting Gmail, Drive or Photos for personalized search can also make that information available for personalized advertising.
+
+Also in this issue:
+→ Chips: Larger masks gain a roadmap
+→ Explainer: The same AI task can cost more by language
+→ Tech: OpenAI science claims face outside scrutiny; Brotli flaw requires patches and restarts
+→ Companies: Microsoft, Apple, Anthropic, NBA, Amazon, Tesla, OpenAI
+→ World: Oleshky truce aims to open aid route
+→ GitHub: 15 trending repos, deep dives on hyperframes and microduck
+
+Eight pages, 12–15 minutes. Free to read online or print as a PDF:
+https://berkeokur.github.io/thecommit/001/
+
+Next issue: Thursday 29 October.
+
+#TechNews #AI #Semiconductors #Privacy
