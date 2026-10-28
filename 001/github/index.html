@@ -66,6 +66,9 @@ p{text-wrap:pretty}
 .front{margin-top:24px;flex:1 1 auto}
 .front .cols{font-size:15px;line-height:1.45}
 .index{margin-top:18px}
+.photo{margin:0 0 12px;break-inside:avoid}
+.photo img{display:block;width:100%;aspect-ratio:1100/665;object-fit:cover;background:#000}
+.photo figcaption{margin-top:5px;font-size:11px;line-height:14px}
 .index .sechead{padding-bottom:6px}
 .irow{display:grid;grid-template-columns:44px 120px minmax(0,1fr);column-gap:12px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--hair);font-size:15px;line-height:1.35}
 .irow:last-child{border-bottom:0}
@@ -213,6 +216,71 @@ footer .pg{padding:0 5px;background:var(--accent);color:var(--on-accent);font-we
 .runhead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
 .minicursor{display:inline-block;width:6px;height:11px;margin:0 3px;background:var(--accent);vertical-align:-1px}
 
+/* magazine cover (lead.cover_summary): page 1 becomes a cover; the lead opens p.2 */
+.page.cover{position:relative;padding-top:0}
+.cover .panel{position:relative;margin:0 -48px;padding:40px 48px 26px;height:600px;display:flex;flex-direction:column;overflow:hidden;color:var(--paper);background:var(--accent)}
+.cover .panel.photo{background:#000}
+.cover .panel>.row,.cover .panel>.mast,.cover .panel>.cstory,.cover .panel>.credit{position:relative;z-index:3}
+.cover .panel .row{color:#C9D2FF}.cover .panel.photo .row{color:#8A8D93}
+.cover .mast h1{color:var(--paper)}
+.cover .mast .issue{color:#C9D2FF}.cover .panel.photo .mast .issue{color:#8A8D93}.cover .mast .issue .ink{color:var(--paper)}
+.cover .mast::before{display:none}
+.cover .panel:not(.photo) .cursor{background:var(--paper)}
+.cover .dots{position:absolute;inset:0;z-index:1;background-image:radial-gradient(#4A66E6 1.6px,transparent 1.7px);background-size:14px 14px;
+  -webkit-mask-image:linear-gradient(200deg,#000 0%,#000 45%,transparent 80%);mask-image:linear-gradient(200deg,#000 0%,#000 45%,transparent 80%)}
+.cover .photo .dots{background-image:radial-gradient(#2A2D33 1.5px,transparent 1.6px);
+  -webkit-mask-image:linear-gradient(160deg,#000 0%,rgba(0,0,0,.6) 30%,transparent 55%);mask-image:linear-gradient(160deg,#000 0%,rgba(0,0,0,.6) 30%,transparent 55%)}
+/* a photo fills the panel and darkens into it at the top and bottom, so the type sits on the picture */
+.cover .hero{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .shade{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,#000 0,rgba(0,0,0,.85) 13%,transparent 30%,transparent 52%,rgba(0,0,0,.78) 70%,#000 86%)}
+/* without a photo, a ghosted company logo or the issue number fills the same space */
+.cover .mark{position:absolute;z-index:1;right:-24px;top:118px;width:360px;height:360px;background:#3654E4;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
+/* company marks beside each company story's label; brands without a free mark get a monogram */
+.co{display:inline-flex;align-items:center;gap:5px;color:var(--ink);font-weight:600}
+.co .ic{display:inline-block;width:13px;height:13px;background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
+.co .mono{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;background:var(--ink);color:var(--paper);font:700 9px/1 var(--mono)}
+.cover .numeral{position:absolute;z-index:1;right:-28px;top:178px;font:700 300px/.8 var(--mono);letter-spacing:-.06em;color:#3654E4;white-space:nowrap}
+.cover .numeral::after{content:"";display:inline-block;width:.42em;height:.74em;margin-left:.06em;background:#5874EE;vertical-align:-.02em}
+.cover .ghost{position:absolute;z-index:1;right:-44px;top:112px;width:600px;height:200px;background:#3654E4;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:right center;mask-position:right center;-webkit-mask-size:contain;mask-size:contain}
+.cover .cstory{margin-top:auto;display:flex;flex-direction:column;max-width:560px}
+.cover .photo .cstory{max-width:620px}
+.cover .cstory .kicker{background:var(--paper);color:var(--accent)}
+.cover .photo .cstory .kicker{background:var(--accent);color:var(--paper)}
+.cover .cstory h2{margin-top:12px;font-size:52px;line-height:1.02;font-weight:600;letter-spacing:-.03em}
+.cover .cstory .deck{margin-top:12px;font-size:19px;line-height:1.38;color:#DCE2FF}
+.cover .photo .cstory .deck{color:#C4C6CA}
+.cover .credit{position:absolute!important;right:48px;bottom:26px;font:500 10px/14px var(--mono);color:#6B6E74;letter-spacing:.04em;text-transform:uppercase}
+.cover .panel:not(.photo) .credit{color:#9FB0F5}
+.cover .band{margin:0 -48px;padding:8px 48px}
+.cover .panel:not(.photo) + .band{background:var(--ink)}
+.cover .lede{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;margin-top:18px;padding-bottom:16px;border-bottom:2px solid var(--ink)}
+.cover .lede p{font-size:16px;line-height:1.45}
+.cover .jump{white-space:nowrap;color:var(--ink);font-weight:600}
+.cover .cpg{font-family:var(--mono);font-size:12px;font-weight:600;padding:1px 5px;background:var(--accent);color:var(--on-accent)}
+.cover .lines{margin-top:16px}
+.cl{display:grid;grid-template-columns:56px 64px 124px minmax(0,1fr);column-gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--hair)}
+.cl:last-child{border-bottom:0}
+.cl .cpg{justify-self:start}
+.cl .hash{font:12px/16px var(--mono);color:#9A9DA3}
+.cl .sn{font:12px/16px var(--mono);color:var(--graphite);text-transform:uppercase;letter-spacing:.04em}
+.cl .hl b{display:block;font-size:16px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl .hl i{display:block;font-style:normal;font-size:13.5px;line-height:1.35;color:var(--graphite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cover .footer-wrap{padding-top:14px}
+.cover-tech .cover-lead{margin-top:18px;flex:1 1 auto}
+.cover-tech .cover-lead h2{margin-top:14px;font-size:36px}
+.cover-tech .cover-lead .deck{font-size:18px}
+.cover-tech .cover-lead .cols{font-size:15px;line-height:1.45}
+.cover-tech .radar{margin-top:18px;flex-shrink:0}
+.cover-tech .radar .grid2{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:20px}
+.cover-tech .radar .card{padding:10px 0 0}
+.cover-tech .radar .card h3{font-size:15px;line-height:1.25}
+.cover-tech .radar .card p{font-size:13px;line-height:1.38}
+.cover-tech .briefs .card.wide p{column-count:2;column-gap:40px;column-rule:1px solid var(--hair)}
+.cover-tech .briefs .card.wide{flex:0 0 auto}
+.cover-tech .briefs .card p{font-size:15.5px;line-height:1.48}
+
 /* links keep the printed look; on screen they show on hover */
 a.lk{color:inherit;text-decoration:none}
 @media screen{a.lk:hover{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:2px}}
@@ -292,6 +360,7 @@ a.lk{color:inherit;text-decoration:none}
   "topic": "Privacy",
   "headline": "Google opens personal AI data to ad targeting",
   "deck": "Connecting Gmail, Drive or Photos for personalized search can also make that information available for personalized advertising.",
+  "cover_summary": "Google’s revised privacy policy lets information from Gmail, Drive and Photos, shared with Search’s Personal Intelligence, inform personalized advertising. Advertisers do not get the files, and users can disconnect apps to opt out.",
   "source": {
    "name": "theverge.com",
    "url": "https://www.theverge.com/tech/1017600/google-personal-intelligence-privacy-policy-ads-update"
@@ -327,14 +396,6 @@ a.lk{color:inherit;text-decoration:none}
     "name": "arstechnica.com",
     "url": "https://arstechnica.com/ai/2026/10/boston-dynamics-employees-want-to-block-sale-of-robot-dogs-to-ice/"
    }
-  },
-  {
-   "headline": "Ukraine disputes Musk’s Starlink accusation",
-   "body": "Elon Musk accused Ukraine of using civilian Starlink for lethal drone strikes in violation of its terms, while Ukrainian officials disputed that account. Ars Technica reports that the argument followed satellite restrictions affecting drones above certain speeds. Ukrainian officials said previous controls already prevented the alleged use of the commercial service, and that moving drone terminals instead required the US-controlled military Starshield system. President Volodymyr Zelenskyy said the new restrictions had been lifted and necessary speeds restored. Officials have sometimes used Starlink and Starshield interchangeably, complicating interpretation of their statements. The conflicting accounts leave the precise service involved disputed, while demonstrating the operational consequences when military communications depend on privately supplied satellite infrastructure.",
-   "source": {
-    "name": "arstechnica.com",
-    "url": "https://arstechnica.com/tech-policy/2026/10/musk-accuses-ukraine-of-violating-starlink-terms-with-deadly-drone-strikes/"
-   }
   }
  ],
  "radar": [
@@ -368,22 +429,6 @@ a.lk{color:inherit;text-decoration:none}
    "source": {
     "name": "arstechnica.com",
     "url": "https://arstechnica.com/tech-policy/2026/10/highway-thieves-are-spoofing-gps-to-steal-millions-in-data-center-bound-cargo/"
-   }
-  },
-  {
-   "headline": "Acer handheld reaches America",
-   "body": "Acer’s first officially launched US gaming handheld, the Predator Atlas 8, arrives November 1 at $1,299.99, with an eight-inch display and Windows 11.",
-   "source": {
-    "name": "theverge.com",
-    "url": "https://www.theverge.com/games/1019245/acer-predator-atlas-8-launch-price"
-   }
-  },
-  {
-   "headline": "Early foldable screens fail",
-   "body": "Some iPhone Duo buyers report internal OLED failures within hours of use, Ars reports. The accounts establish early defects, without measuring how widespread they are.",
-   "source": {
-    "name": "arstechnica.com",
-    "url": "https://arstechnica.com/gadgets/2026/10/some-iphone-duo-screens-are-already-failing/"
    }
   }
  ],
@@ -725,14 +770,14 @@ a.lk{color:inherit;text-decoration:none}
    "standfirst": "Microduck combines learned movement with distinct services for motors, communications and software recovery on a tiny biped.",
    "why_selected": "Its documented architecture shows how learned behavior fits into a recoverable physical system.",
    "paragraphs": [
-    "Microduck is the software brain of a tiny biped robot, described in its README as about 25 centimetres tall and weighing 800 grams. A Rockchip RK3566 runs a 50 Hz control loop that drives fifteen servos using neural movement policies. The repository is for running the robot; training lives in a separate project that exports policies into the ONNX format loaded here.",
-    "The interesting part is how much surrounds the learned movement. One Rust workspace contains separate services: robotd owns the control loop and motor bus, configd manages Wi-Fi and identity, and other daemons handle Bluetooth, gamepad input, camera streaming and the depth sensor. They communicate through a shared JSON-RPC contract over Unix sockets. The app, console, gamepad and user scripts therefore address the same interface.",
-    "Updates are treated as part of operating a physical machine. The updater installs signed releases and rolls back if the robot starts in an unhealthy state. The README also points to a simulator that runs the real daemons against a body in MuJoCo, offering a route for exploring the software without a robot on the desk.",
+    "Microduck is the software brain of a tiny biped robot, described in its README as about 25 centimetres tall and weighing 800 grams. A Rockchip RK3566 runs a 50 Hz control loop that drives fifteen servos using neural movement policies. Training lives in a separate project that exports the ONNX policies loaded here.",
+    "The interesting part is how much surrounds the learned movement. One Rust workspace contains separate services: robotd owns the control loop and motor bus, configd manages Wi-Fi and identity, and other daemons handle Bluetooth, gamepad input, camera streaming and the depth sensor. They communicate through a shared JSON-RPC contract over Unix sockets. The app, console, gamepad and scripts therefore share one interface.",
+    "Updates are treated as part of operating a physical machine. The updater installs signed releases and rolls back if the robot starts in an unhealthy state. The README also points to a simulator that runs the real daemons against a body in MuJoCo, so the software can be explored without a robot.",
     "The project describes walking, standing after a fall and switching to a roller policy when wheels are fitted. These are documented capabilities, without hands-on verification here. Its appeal is the complete system around those behaviors: control, communication and recovery are visible alongside the neural policies."
    ]
   }
  ],
- "_hash": "a7d989e",
+ "_hash": "ca15434",
  "_edition": "github",
  "_markets": {
   "since": "2026-10-23",
@@ -813,6 +858,37 @@ a.lk{color:inherit;text-decoration:none}
     "change": -1.88,
     "as_of": "2026-10-26"
    }
+  ]
+ },
+ "_icons": {
+  "lead": {
+   "slug": "google",
+   "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R29vZ2xlPC90aXRsZT48cGF0aCBkPSJNMTIuNDggMTAuOTJ2My4yOGg3Ljg0Yy0uMjQgMS44NC0uODUzIDMuMTg3LTEuNzg3IDQuMTMzLTEuMTQ3IDEuMTQ3LTIuOTMzIDIuNC02LjA1MyAyLjQtNC44MjcgMC04LjYtMy44OTMtOC42LTguNzJzMy43NzMtOC43MiA4LjYtOC43MmMyLjYgMCA0LjUwNyAxLjAyNyA1LjkwNyAyLjM0N2wyLjMwNy0yLjMwN0MxOC43NDcgMS40NCAxNi4xMzMgMCAxMi40OCAwIDUuODY3IDAgLjMwNyA1LjM4Ny4zMDcgMTJzNS41NiAxMiAxMi4xNzMgMTJjMy41NzMgMCA2LjI2Ny0xLjE3MyA4LjM3My0zLjM2IDIuMTYtMi4xNiAyLjg0LTUuMjEzIDIuODQtNy42NjcgMC0uNzYtLjA1My0xLjQ2Ny0uMTczLTIuMDUzSDEyLjQ4eiIvPjwvc3ZnPg=="
+  },
+  "companies": [
+   null,
+   {
+    "slug": "apple",
+    "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QXBwbGU8L3RpdGxlPjxwYXRoIGQ9Ik0xMi4xNTIgNi44OTZjLS45NDggMC0yLjQxNS0xLjA3OC0zLjk2LTEuMDQtMi4wNC4wMjctMy45MSAxLjE4My00Ljk2MSAzLjAxNC0yLjExNyAzLjY3NS0uNTQ2IDkuMTAzIDEuNTE5IDEyLjA5IDEuMDEzIDEuNDU0IDIuMjA4IDMuMDkgMy43OTIgMy4wMzkgMS41Mi0uMDY1IDIuMDktLjk4NyAzLjkzNS0uOTg3IDEuODMxIDAgMi4zNS45ODcgMy45Ni45NDggMS42MzctLjAyNiAyLjY3Ni0xLjQ4IDMuNjc2LTIuOTQ4IDEuMTU2LTEuNjg4IDEuNjM2LTMuMzI1IDEuNjYyLTMuNDE1LS4wMzktLjAxMy0zLjE4Mi0xLjIyMS0zLjIyLTQuODU3LS4wMjYtMy4wNCAyLjQ4LTQuNDk0IDIuNTk3LTQuNTU5LTEuNDI5LTIuMDktMy42MjMtMi4zMjQtNC4zOS0yLjM3Ni0yLS4xNTYtMy42NzUgMS4wOS00LjYxIDEuMDl6TTE1LjUzIDMuODNjLjg0My0xLjAxMiAxLjQtMi40MjcgMS4yNDUtMy44My0xLjIwNy4wNTItMi42NjIuODA1LTMuNTMyIDEuODE4LS43OC44OTYtMS40NTQgMi4zMzgtMS4yNzMgMy43MTQgMS4zMzguMTA0IDIuNzE1LS42ODggMy41NTktMS43MDEiLz48L3N2Zz4="
+   },
+   {
+    "slug": "apple",
+    "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QXBwbGU8L3RpdGxlPjxwYXRoIGQ9Ik0xMi4xNTIgNi44OTZjLS45NDggMC0yLjQxNS0xLjA3OC0zLjk2LTEuMDQtMi4wNC4wMjctMy45MSAxLjE4My00Ljk2MSAzLjAxNC0yLjExNyAzLjY3NS0uNTQ2IDkuMTAzIDEuNTE5IDEyLjA5IDEuMDEzIDEuNDU0IDIuMjA4IDMuMDkgMy43OTIgMy4wMzkgMS41Mi0uMDY1IDIuMDktLjk4NyAzLjkzNS0uOTg3IDEuODMxIDAgMi4zNS45ODcgMy45Ni45NDggMS42MzctLjAyNiAyLjY3Ni0xLjQ4IDMuNjc2LTIuOTQ4IDEuMTU2LTEuNjg4IDEuNjM2LTMuMzI1IDEuNjYyLTMuNDE1LS4wMzktLjAxMy0zLjE4Mi0xLjIyMS0zLjIyLTQuODU3LS4wMjYtMy4wNCAyLjQ4LTQuNDk0IDIuNTk3LTQuNTU5LTEuNDI5LTIuMDktMy42MjMtMi4zMjQtNC4zOS0yLjM3Ni0yLS4xNTYtMy42NzUgMS4wOS00LjYxIDEuMDl6TTE1LjUzIDMuODNjLjg0My0xLjAxMiAxLjQtMi40MjcgMS4yNDUtMy44My0xLjIwNy4wNTItMi42NjIuODA1LTMuNTMyIDEuODE4LS43OC44OTYtMS40NTQgMi4zMzgtMS4yNzMgMy43MTQgMS4zMzguMTA0IDIuNzE1LS42ODggMy41NTktMS43MDEiLz48L3N2Zz4="
+   },
+   {
+    "slug": "anthropic",
+    "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QW50aHJvcGljPC90aXRsZT48cGF0aCBkPSJNMTcuMzA0MSAzLjU0MWgtMy42NzE4bDYuNjk2IDE2LjkxOEgyNFptLTEwLjYwODIgMEwwIDIwLjQ1OWgzLjc0NDJsMS4zNjkzLTMuNTUyN2g3LjAwNTJsMS4zNjkzIDMuNTUyOGgzLjc0NDJMMTAuNTM2MyAzLjU0MDlabS0uMzcxMiAxMC4yMjMyIDIuMjkxNC01Ljk0NTYgMi4yOTE0IDUuOTQ1NloiLz48L3N2Zz4="
+   },
+   {
+    "slug": "nba",
+    "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+TkJBPC90aXRsZT48cGF0aCBkPSJNOS4xOSAwYTIuNDg2IDIuNDg2IDAgMCAwLTIuNDg1IDIuNDg0djE5LjAyOUEyLjQ4OCAyLjQ4OCAwIDAgMCA5LjE5IDI0aDUuNjE1YTIuNDkzIDIuNDkzIDAgMCAwIDIuNDktMi40ODdWMi40ODRBMi40ODggMi40ODggMCAwIDAgMTQuODEgMHptMCAuNTg0aDMuMjFjLS42Mi4yMzctLjcwNy41MDgtLjczIDEuMzY2LS4xMDUuMDEtLjMyNS0uMDg3LS4yNS40MzQgMCAwIC4wNDMuMzQ2LjE4LjI4Ni0uMTMzLjkxOC4wMjMuOTktLjkzIDEuMDMxbC0uMDQ3LjA2N2MtLjk1LjA5My0xLjI1LS4wMjctMi4wNSAxLjYwMyAwIDAtLjIwNy41MDUtLjI2OC43MTQtLjE5Ny40MTUtLjY3NCAxLjMyOC0uODE5IDEuOTE5LS4wNDYuMi0uMTQuMjY0LS4wMS41NTMuMTg1LjQxNy0uMTI0LjUyNy45NS40OTZWOS4zcy0uMjg2LjI0Ny0uMzQ2LjM5OGMtLjA2MS4xNDctLjIyNi44OS0uMjIgMS4yMzcuMDE5LjkxNy43NjcgMS42ODMuOTkyIDIuNTk3bC40OTIuMDdjLjI4Mi42MzQgMS40OTUgMi4zNTUgMS43NDMgMi41ODIuMDU3LjE1OS4zNjUuMzU1LjU0NS41NTEuMTQ5LjE0MSAxLjAyNSAxLjEgMi4wNTQgMS42OTItLjAwNy0uMDAxLjE2NC4zNDQuMjQ5LjYxOC0uMzQyLjI3NS4zMi43NzcuNTIgMS42MDkuMDEyLjEwNy0uMTkuMjIyLjExNC40OTUtLjAyMiAxLjI1Ni0uNDAyIDEuOTE4LjI0MSAyLjI2Nkg5LjE5MWExLjkgMS45IDAgMCAxLTEuOS0xLjkwMVYyLjQ4NmExLjkgMS45IDAgMCAxIDEuOS0xLjkwMnptMy44MDQuMDAyaDEuODE1YTEuOSAxLjkgMCAwIDEgMS44OTcgMS44OTh2OS4xOTNhMS42NTMgMS42NTMgMCAwIDAtLjIyLS4zOTdjMC0uMjU1LS4yNzItLjI0OS0uMzQ2LS4zNDQtLjA3LS4wODEuMDY3LS4xMjgtLjQwNy0uMjM1LS4wOS0uMDUtLjE1OC0uNzQ3LS4xNTgtLjc0Ny0uMDctLjQ0Ny0uMjI5LS43NTQtLjQ2Ny0xLjIyNy0uMTItLjI0My0uMTc3LTEuMDAxLS4zMDUtMS4zODYuMDcxLTEuNzY3LS40OTMtMi4yOC0uOTUtMi41NjktLjE3NC0uMTEtLjI2Mi0uMTkxLS40MzMtLjI5bC0uMDA1LS4wODJjLS4xMzMtLjEyNi0uNDAyLS4yNjQtLjYyMy0uMzYyLS4wNjgtLjA3LS4wMzctLjIyLjAxLS4yNzYuMTUtLjAyLjM0OC0uMzU2LjUxMy0uNzAzLjEyOS4wMDkuMTc0LS4xMTguMjE0LS4xOS4xMzgtLjIyMi4yODgtLjQxMy4wOTYtLjU0Mi40MzUtLjc3Ny4xNTQtMS4zMDEtLjA4LTEuMzIxLS4wOTUtLjE5NS0uMjYtLjMxNi0uNTUxLS40MnptLjU1MSA2LjMzOGMuMDYuMzE5LjM0IDEuOTI5LjQ1NiAyLjE4Ny4xMjMuMjU5LjUzNSAxLjA1LjczIDEuNTRhMS42OSAxLjY5IDAgMCAwLTEuMjk0IDEuNjQ2IDEuNjkyIDEuNjkyIDAgMCAwIDEuNjkzIDEuNjkxIDEuNjkyIDEuNjkyIDAgMCAwIDEuNTc2LTEuMDY2djguNTlhMS44ODcgMS44ODcgMCAwIDEtMS41OTggMS44NzdoLS4wMTdjLjgzMy0uNTAyLjMxOS0xLjQ2LjE2LTIuMDIyLS4wMTItLjAzMy4wMTQtLjA3NC4wMjYtLjEuMDQ1LS4wOC0uMDQ1LS4yNTctLjA0NS0uMjU3LS4wOTgtLjA5LS4xMjctLjU2MS0uMTgyLS43NzItLjA4OS0uMzU4LjE1Ny0uOTcxLjE1Ny0xLjE4IDAtLjIwNi0uMTU2LS40OTEtLjQ0NS0uODU4LS4wNjktLjA3OC0uMjc2LTEuODYtLjQ2Mi0yLjMxMy0uMjU4LS42MjMtLjMzOS0uNTI2LS42NC0xLjI2Ni0uMjQtLjUyNS0uMDU1LTEuMjk1LS41OS0zLjA4NS4wMDUuMDA2LjEyLS4xMTMuMTItLjExM3MtLjQyMi0xLjU1LS41NjEtMS45NzVjLS4xNC0uNDI2LS4zODUtLjQ1Ni0uMzg1LS40NTZzLjAwMi0uMTcyLjAxMi0uMjE2Yy4wMi0uMDcuNTE2LTEuMzY3LjU1OC0xLjQwNy4wMDEtLjAzLjcxNy0uNTE0LjczMS0uNDQ1WiIvPjwvc3ZnPg=="
+   },
+   null,
+   {
+    "slug": "tesla",
+    "src": "data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+VGVzbGE8L3RpdGxlPjxwYXRoIGQ9Ik0xMiA1LjM2MmwyLjQ3NS0zLjAyNnM0LjI0NS4wOSA4LjQ3MSAyLjA1NGMtMS4wODIgMS42MzYtMy4yMzEgMi40MzgtMy4yMzEgMi40MzgtLjE0Ni0xLjQzOS0xLjE1NC0xLjc5LTQuMzU0LTEuNzlMMTIgMjQgOC42MTkgNS4wMzRjLTMuMTggMC00LjE4OC4zNTQtNC4zMzUgMS43OTIgMCAwLTIuMTQ2LS43OTUtMy4yMjktMi40M0M1LjI4IDIuNDMxIDkuNTI1IDIuMzQgOS41MjUgMi4zNEwxMiA1LjM2MmwtLjAwNC4wMDJIMTJ2LS4wMDJ6bTAtMy44OTljMy40MTUtLjAzIDcuMzI2LjUyOCAxMS4zMjggMi4yOC41MzUtLjk2OC42NzItMS4zOTUuNjcyLTEuMzk1QzE5LjYyNS42MTIgMTUuNTI4LjAxNSAxMiAwIDguNDcyLjAxNSA0LjM3NS42MSAwIDIuMzQ5YzAgMCAuMTk1LjUyNS42NzIgMS4zOTZDNC42NzQgMS45ODkgOC41ODUgMS40MzUgMTIgMS40NnYuMDAzeiIvPjwvc3ZnPg=="
+   },
+   null
   ]
  }
 }</script>
@@ -933,6 +1009,107 @@ a.lk{color:inherit;text-decoration:none}
     return footer(left, t(mid), n + " / " + TOTAL, "colophon");
   }
 
+  var cover = eight && !!(d.lead && d.lead.cover_summary);  // magazine cover; the lead opens p.2
+  function hash7(s) {  // a stable commit-style id for a coverline
+    var x = 2166136261;
+    for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); }
+    return ((x >>> 0).toString(16) + "0000000").slice(0, 7);
+  }
+  function maskEl(cls, src) {  // a monochrome mark: the SVG cuts its shape out of the element's colour
+    var el = h("span", cls, []), m = "url(\"" + src + "\")";
+    el.style.webkitMaskImage = m; el.style.maskImage = m;
+    el.setAttribute("aria-hidden", "true");
+    return el;
+  }
+  function coverPage(band) {
+    var L = d.lead, P = d._photo, I = (d._icons || {}).lead;
+    var kind = P ? (P.kind || "photo") : I ? "icon" : "numeral";
+    var pg = h("section", "page cover", []);
+    pg.setAttribute("aria-label", "Page 1");
+    var panel = h("div", "panel " + kind, [h("div", "dots", [])]);
+    if (kind === "photo") {
+      var hero = h("img", "hero", []);
+      hero.src = P.src; hero.alt = P.alt;
+      if (P.position) hero.style.objectPosition = P.position;
+      panel.appendChild(hero);
+      panel.appendChild(h("div", "shade", []));
+    } else if (kind === "logo") {
+      var ghost = h("div", "ghost", []), mask = "url(\"" + P.src + "\")";
+      ghost.setAttribute("role", "img"); ghost.setAttribute("aria-label", P.alt);
+      ghost.style.webkitMaskImage = mask; ghost.style.maskImage = mask;
+      panel.appendChild(ghost);
+    } else if (kind === "icon") {
+      panel.appendChild(maskEl("mark", I.src));
+    } else {
+      var num = h("div", "numeral", [pad(d.issue.number, 3)]);
+      num.setAttribute("aria-hidden", "true");
+      panel.appendChild(num);
+    }
+    panel.appendChild(h("div", "row meta", [
+      h("span", null, ["~/the-commit $ git log --since=\"" + d.issue.since + "\" --oneline"]),
+      h("span", null, ["HEAD → " + (d._hash || "0000000")])
+    ]));
+    var title = h("h1", null, ["The Commit"]);
+    var cur = h("span", "cursor", []); cur.setAttribute("aria-hidden", "true"); title.appendChild(cur);
+    panel.appendChild(h("div", "mast", [title, h("div", "meta issue", [
+      h("span", "ink", [no + t(" · Vol. ") + d.issue.volume]),
+      h("span", null, [longDate(d.issue.date)]),
+      h("span", null, [t("Twice weekly · Mon & Thu") + (turkish ? " · Türkçe" : "")])
+    ])]));
+    var cs = h("div", "cstory", [h("span", "kicker", [t("Cover story") + " · " + L.topic]), h("h2", null, [L.headline]), h("p", "deck", [L.deck])]);
+    cs.setAttribute("aria-label", "Cover story");
+    panel.appendChild(cs);
+    if (P && P.credit) panel.appendChild(h("span", "credit", [t(kind === "logo" ? "Logo: " : "Image: ") + P.credit]));
+    pg.appendChild(panel);
+    pg.appendChild(band);
+    var lede = h("div", "lede", [h("p", null, [L.cover_summary]), h("span", "meta jump", [h("span", "cpg", ["p.2"]), " " + t("Full story") + " →"])]);
+    lede.setAttribute("aria-label", "Cover summary");
+    pg.appendChild(fit(lede, "Cover summary"));
+    var heads = function (list) { return list.map(function (x) { return x.headline; }).join(" · "); };
+    var top = d.repos[0];
+    var rows = [
+      ["p.2–3", "Tech", d.briefs[0].headline, t("Also: ") + heads(d.briefs.slice(1).concat(d.radar.slice(0, 1)))],
+      ["p.4", "Chips", d.semiconductors.lead.headline, d.semiconductors.lead.deck],
+      ["p.5", "Explainer", d.explainer.headline, d.explainer.standfirst],
+      ["p.6–7", "Companies", d.companies[0].headline, t("Also: ") + heads(d.companies.slice(1, 4))],
+      ["p.8", "World", d.world.briefs[0].headline, t("Also: ") + d.world.briefs.slice(1).map(function (x) { return x.region; }).join(", ")],
+      ["web", "GitHub", d.repos.length + t(" trending repos"), (d.github_deep_dives ? t("Deep dives: ") + d.github_deep_dives.map(function (x) { return x.full_name.split("/")[1]; }).join(", ") + " · " : "")
+        + t("top: ") + top.full_name + " (+" + k(top.stars_gained) + ")"]
+    ];
+    var lines = h("section", "lines", [sechead("··", "In this issue", "git log --oneline")].concat(rows.map(function (r) {
+      return h("div", "cl", [h("span", "cpg", [t(r[0])]), h("span", "hash", [hash7(r[2])]), h("span", "sn", [t(r[1])]),
+        h("span", "hl", [h("b", null, [r[2]]), h("i", null, [r[3]])])]);
+    })));
+    lines.setAttribute("aria-label", "In this issue");
+    pg.appendChild(fit(lines, "Index"));
+    pg.appendChild(footer2(1, "p.2 → Cover story"));
+    return pg;
+  }
+  function coverTech() {  // p.2: the full lead and four radar items; p.3: three briefs
+    var L = d.lead;
+    var p2 = page(2, "Cover story");
+    p2.classList.add("tech-expanded", "cover-tech");
+    var lead = story("cover-lead", L.topic, L, L.deck, [L.author, L.read_minutes ? L.read_minutes + t(" min read") : null], "Lead story");
+    lead.removeChild(lead.querySelector(".kicker"));  // the cover already carries the topic; it moves to the section head
+    lead.insertBefore(sechead("01", "Cover story", L.topic), lead.firstChild);
+    p2.appendChild(lead);
+    var short = fit(h("section", "sec radar", [sechead("02", "Tech radar"),
+      h("div", "grid2", d.radar.map(function (r) { return card(r, [t("src: "), srcName(r)]); }))]), "Tech radar");
+    short.setAttribute("aria-label", "Tech radar");
+    p2.appendChild(short);
+    p2.appendChild(footer2(2, "p.3 → Tech news"));
+    var p3 = page(3, "Tech");
+    p3.classList.add("tech-expanded", "cover-tech");
+    var first = card(d.briefs[0], [t("src: "), srcName(d.briefs[0])]);
+    first.classList.add("wide");
+    var news = fit(h("section", "sec briefs", [sechead("03", "Tech news"), first,
+      h("div", "grid2", d.briefs.slice(1).map(function (b) { return card(b, [t("src: "), srcName(b)]); }))]), "Tech news");
+    news.setAttribute("aria-label", "Tech news");
+    p3.appendChild(news);
+    p3.appendChild(footer2(3, "p.4 → Semiconductors"));
+    return [p2, p3];
+  }
+
   var pages;
   if (!github) {
     // ---------- page 1: front ----------
@@ -963,6 +1140,13 @@ a.lk{color:inherit;text-decoration:none}
     p1.appendChild(band);
     var L = d.lead;
     var lead = story("front", "01 · " + L.topic, L, L.deck, [L.author, L.read_minutes ? L.read_minutes + t(" min read") : null], "Lead story");
+    if (d._photo && (d._photo.kind || "photo") === "photo") {  // the editor's desk photo (research/NNN/image.json), at the top of the lead's first column
+      var P = d._photo, img = h("img", null, []);
+      img.src = P.src; img.alt = P.alt;
+      var caption = (turkish && P.caption_tr) || P.caption;
+      var body = lead.querySelector(".cols");
+      body.insertBefore(h("figure", "photo", [img, h("figcaption", "meta", [caption + " · " + t("Image: ") + P.credit])]), body.firstChild);
+    }
     p1.appendChild(lead);
     var heads = function (list) { return list.map(function (x) { return x.headline; }).join(" · "); };
     var top = d.repos[0];
@@ -989,6 +1173,7 @@ a.lk{color:inherit;text-decoration:none}
     index.setAttribute("aria-label", "In this issue");
     p1.appendChild(fit(index, "Index"));
     p1.appendChild(footer2(1, "p.2 → Tech news"));
+    if (cover) p1 = coverPage(band.cloneNode(true));
 
     // Shared reports preserve the existing card-based design.
     var W = d.world, p4, p5, p6, p7, p8;
@@ -1002,7 +1187,12 @@ a.lk{color:inherit;text-decoration:none}
       var label = continued ? "Company actions continued" : "Company actions";
       var section = fit(h("section", "sec companies" + (continued ? " continued" : ""), [
         sechead(eight ? (continued ? "10" : "09") : (continued ? "07" : "06"), label, windowLabel(d.issue.since, d.issue.date)),
-        h("div", "grid2", items.map(function (c) { return card(c, [h("span", "company", [c.company]), " · ", srcName(c)]); }))
+        h("div", "grid2", items.map(function (c) {
+          var mark = ((d._icons || {}).companies || [])[d.companies.indexOf(c)];
+          var badge = mark ? maskEl("ic", mark.src) : h("span", "mono", [c.company.charAt(0)]);
+          if (!mark) badge.setAttribute("aria-hidden", "true");
+          return card(c, [h("span", "company co", [badge, c.company]), " · ", srcName(c)]);
+        }))
       ]), label);
       section.setAttribute("aria-label", label);
       pg.appendChild(section);
@@ -1025,8 +1215,9 @@ a.lk{color:inherit;text-decoration:none}
         pg.appendChild(footer2(n, next));
         return pg;
       }
-      var p2 = techPage(2, 0, "p.3 → Tech news continued");
-      var p3 = techPage(3, 2, "p.4 → Semiconductors");
+      var p2, p3;
+      if (cover) { var tech = coverTech(); p2 = tech[0]; p3 = tech[1]; }
+      else { p2 = techPage(2, 0, "p.3 → Tech news continued"); p3 = techPage(3, 2, "p.4 → Semiconductors"); }
       p4 = page(4, "Semiconductors");
       var C = d.semiconductors;
       var chip = story("chip-lead", C.lead.topic, C.lead, C.lead.deck, [C.lead.published], "Semiconductor lead");
