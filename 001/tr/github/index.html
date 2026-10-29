@@ -107,6 +107,34 @@ p{text-wrap:pretty}
 .eight .chip-lead .deck,.eight .chip-lead .src{margin-top:8px}
 .chip-briefs .card h3{font-size:17px}
 .chip-briefs .card p{font-size:14px;line-height:1.45}
+/* p.3 AI page: the chips page's lead and briefing, plus a row of new models */
+.ai-lead{margin-top:18px;flex:1 1 auto}
+.ai-lead h2{margin-top:10px;font-size:36px}
+.ai-lead .deck{font-size:18px}
+.eight .ai-lead .cols{margin-top:10px;padding-top:10px;font-size:15px;line-height:1.4;column-gap:24px}
+.eight .ai-lead .kicker{margin-top:12px}
+.eight .ai-lead .deck,.eight .ai-lead .src{margin-top:8px}
+.ai-models{margin-top:14px;flex-shrink:0}
+/* Model watch: one row per model, capability icons explained by the legend below */
+.mw{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.7fr) minmax(0,1fr);column-gap:16px}
+.mw > *{padding:5px 0;border-bottom:1px solid var(--hair);align-self:stretch}
+.mw .th{padding:6px 0 3px;border-bottom:0;font-family:var(--mono);font-size:10.5px;line-height:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--graphite)}
+.mw .grp{padding:6px 0 3px;border-bottom:0;font-family:var(--mono);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.mw .nm b{display:block;font-size:14.5px;line-height:1.25;font-weight:600}
+.mw .nm > span{display:block;margin-top:1px;font-family:var(--mono);font-size:10.5px;line-height:14px;color:var(--graphite);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mw .sz{font-family:var(--mono);font-size:13px;line-height:1.3;font-weight:600}
+.mw .sz small{display:block;font-size:10.5px;font-weight:400;color:var(--graphite)}
+.mw .ic{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;padding-top:6px}
+.mw .row-last{border-bottom:0}
+.cap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;color:var(--accent);border:1px solid color-mix(in srgb,currentColor 40%,transparent);background:color-mix(in srgb,currentColor 8%,transparent);border-radius:4px;flex:0 0 auto}
+/* one colour per capability, dark enough to print and read on paper */
+.cap.reasoning{color:#6D28D9}.cap.vision{color:#0E7490}.cap.code{color:#1E3FD8}.cap.agent{color:#C2410C}
+.cap.audio{color:#BE185D}.cap.image{color:#A16207}.cap.video{color:#B91C1C}.cap.open_weights{color:#15803D}
+.cap svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:4px 11px;margin-top:8px;padding-top:7px;border-top:1px solid var(--ink);font-family:var(--mono);font-size:10px;line-height:20px;color:var(--graphite)}
+.legend .li{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.legend .cap{width:18px;height:18px}
+.legend .cap svg{width:13px;height:13px}
 
 /* explainer */
 .explain{margin-top:18px;flex:1 1 auto}
@@ -796,6 +824,23 @@ a.lk{color:inherit;text-decoration:none}
   "Tech radar": "Teknoloji radarı",
   "Semiconductors": "Yarı iletkenler",
   "Chip briefing": "Çip gündemi",
+  "Model watch: ": "Model takibi: ",
+  "Model watch": "Model takibi",
+  "New from the labs": "Laboratuvarlardan yeni",
+  "Trending on Hugging Face": "HUGGING FACE'TE ÖNE ÇIKANLAR",
+  "Capabilities": "Yetenekler",
+  "Size": "Boyut",
+  "undisclosed": "açıklanmadı",
+  " active": " aktif",
+  "Reasoning": "Akıl yürütme",
+  "Vision": "Görüntü",
+  "Coding": "Kodlama",
+  "Agents & tool use": "Ajan ve araçlar",
+  "Speech & audio": "Konuşma ve ses",
+  "Image generation": "Görsel üretimi",
+  "Video": "Video",
+  "Open weights": "Açık ağırlık",
+  "AI": "Yapay zekâ",
   "Explainer": "Yakından bakış",
   "Companies": "Şirketler",
   "World report": "Dünya gündemi",
@@ -1136,7 +1181,8 @@ a.lk{color:inherit;text-decoration:none}
     var heads = function (list) { return list.map(function (x) { return x.headline; }).join(" · "); };
     var top = d.repos[0];
     var rows = [
-      ["p.2–3", "Tech", d.briefs[0].headline, t("Also: ") + heads(d.briefs.slice(1).concat(d.radar.slice(0, 1)))],
+      d.ai ? ["p.3", "AI", d.ai.lead.headline, t("Model watch: ") + d.ai.models.filter(function (x) { return x.kind === "release"; }).map(function (x) { return x.name; }).join(", ")]
+        : ["p.2–3", "Tech", d.briefs[0].headline, t("Also: ") + heads(d.briefs.slice(1).concat(d.radar.slice(0, 1)))],
       ["p.4", "Chips", d.semiconductors.lead.headline, d.semiconductors.lead.deck],
       ["p.5", "Explainer", d.explainer.headline, d.explainer.standfirst],
       ["p.6–7", "Companies", d.companies[0].headline, t("Also: ") + heads(d.companies.slice(1, 4))],
@@ -1153,7 +1199,59 @@ a.lk{color:inherit;text-decoration:none}
     pg.appendChild(footer2(1, "p.2 → Cover story"));
     return pg;
   }
-  function coverTech() {  // p.2: the full lead and four radar items; p.3: three briefs
+  // Capability icons for Model watch: 16-unit line drawings, coloured by CSS. Names match the schema's enum.
+  var CAPS = {
+    reasoning: ["Reasoning", '<path d="M8 3.6c-.8-1-2.5-1.1-3.3-.2-1.3-.2-2.4.8-2.3 2-1.1.4-1.6 1.7-1 2.7-.6.9-.3 2.2.7 2.6.1 1.2 1.3 2 2.5 1.6.6.8 1.8 1 2.6.4.3.4.5.5.8.5M8 3.6c.8-1 2.5-1.1 3.3-.2 1.3-.2 2.4.8 2.3 2 1.1.4 1.6 1.7 1 2.7.6.9.3 2.2-.7 2.6-.1 1.2-1.3 2-2.5 1.6-.6.8-1.8 1-2.6.4-.3.4-.5.5-.8.5"/><path d="M8 3.6c-.6.8-.6 1.7 0 2.4-.6.8-.6 1.8 0 2.6-.6.8-.6 1.8 0 2.6M4.6 5.6c.7 0 1.3.4 1.5 1M3.6 8.7c.7-.3 1.5-.2 2 .3M11.4 5.6c-.7 0-1.3.4-1.5 1M12.4 8.7c-.7-.3-1.5-.2-2 .3"/>'],
+    vision: ["Vision", '<path d="M1.5 8S3.9 3.6 8 3.6 14.5 8 14.5 8 12.1 12.4 8 12.4 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2.1"/>'],
+    code: ["Coding", '<path d="M5.4 4.6 2 8l3.4 3.4M10.6 4.6 14 8l-3.4 3.4M9.2 3 6.8 13"/>'],
+    agent: ["Agents & tool use", '<rect x="3" y="5.2" width="10" height="8" rx="2"/><path d="M8 5.2V2.8"/><circle cx="8" cy="2.2" r=".7"/><path d="M6 8.8v.4M10 8.8v.4M6.4 11.2h3.2M1.5 8.4v2M14.5 8.4v2"/>'],
+    audio: ["Speech & audio", '<path d="M2 7v2M4.6 5v6M7.2 2.6v10.8M9.8 4.6v6.8M12.4 6.2v3.6M14.6 7.4v1.2"/>'],
+    image: ["Image generation", '<rect x="2" y="3" width="12" height="10" rx="1.6"/><circle cx="5.6" cy="6.4" r="1.2"/><path d="m2.4 12.2 3.6-3.6 2.4 2.4 2-2 3.2 3.2"/>'],
+    video: ["Video", '<rect x="1.8" y="4" width="9" height="8" rx="1.6"/><path d="m10.8 7 3.4-2.2v6.4L10.8 9z"/>'],
+    open_weights: ["Open weights", '<rect x="3.2" y="7.4" width="9.6" height="6.8" rx="1.4"/><path d="M5.4 7.4V5.2a2.6 2.6 0 0 1 5.1-.8"/><path d="M8 10v1.6"/>']
+  };
+  function cap(name) {
+    var el = h("span", "cap " + name, []);
+    el.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + CAPS[name][1] + "</svg>";
+    el.setAttribute("title", t(CAPS[name][0]));
+    return el;
+  }
+  function modelWatch(models) {  // releases, then Hugging Face trending; the legend lists only icons in use
+    var grid = h("div", "mw", []);
+    var day = function (s) { return fmt(s, { day: "numeric", month: "short" }); };
+    models.forEach(function (m, i) {
+      if (i === 0 || m.kind !== models[i - 1].kind) {  // each group opens with its name and the column labels
+        grid.appendChild(h("span", "grp", [t(m.kind === "release" ? "New from the labs" : "Trending on Hugging Face")]));
+        ["Size", "Capabilities"].forEach(function (x) { grid.appendChild(h("span", "th", [t(x)])); });
+      }
+      var last = i === models.length - 1 || m.kind !== models[i + 1].kind ? " row-last" : "";
+      var maker = h("span", null, [m.maker]);
+      maker.setAttribute("lang", "en");  // makers' names keep English capitals in the Turkish edition (no "LİQUİD")
+      var by = h("span", null, [maker, " · " + (m.kind === "release" ? day(m.published) : "#" + m.rank)]);
+      grid.appendChild(h("span", "nm" + last, [h("b", null, [link(m.source.url, [m.name])]), by]));
+      var size = /^(.+?)\s*\((.+)\)$/.exec(m.params);  // "428B (23B active)": the bracket goes on a second line
+      grid.appendChild(h("span", "sz" + last, m.params === "Undisclosed" ? ["—", h("small", null, [t("undisclosed")])] : size ? [size[1], h("small", null, [t(size[2])])] : [m.params]));
+      grid.appendChild(h("span", "ic" + last, m.capabilities.map(cap)));
+    });
+    var used = Object.keys(CAPS).filter(function (c) { return models.some(function (m) { return m.capabilities.indexOf(c) >= 0; }); });
+    var legend = h("div", "legend", used.map(function (c) { return h("span", "li", [cap(c), t(CAPS[c][0])]); }));
+    legend.setAttribute("aria-label", "Icon legend");
+    var section = fit(h("section", "sec ai-models", [sechead("04", "Model watch", windowLabel(d.issue.since, d.issue.date)), grid, legend]), "Model watch");
+    section.setAttribute("aria-label", "Model watch");
+    return section;
+  }
+  function aiPage() {  // p.3: the AI lead and the Model watch table
+    var A = d.ai;
+    var pg = page(3, "AI");
+    var main = story("ai-lead", A.lead.topic, A.lead, A.lead.deck, [A.lead.published], "AI lead");
+    main.removeChild(main.querySelector(".kicker"));  // the topic moves to the section head, as on the cover story
+    main.insertBefore(sechead("03", "AI", A.lead.topic), main.firstChild);
+    pg.appendChild(main);
+    pg.appendChild(modelWatch(A.models));
+    pg.appendChild(footer2(3, "p.4 → Semiconductors"));
+    return pg;
+  }
+  function coverTech() {  // p.2: the full lead and four radar items; p.3: three briefs, or the AI page
     var L = d.lead;
     var p2 = page(2, "Cover story");
     p2.classList.add("tech-expanded", "cover-tech");
@@ -1165,7 +1263,8 @@ a.lk{color:inherit;text-decoration:none}
       h("div", "grid2", d.radar.map(function (r) { return card(r, [t("src: "), srcName(r)]); }))]), "Tech radar");
     short.setAttribute("aria-label", "Tech radar");
     p2.appendChild(short);
-    p2.appendChild(footer2(2, "p.3 → Tech news"));
+    p2.appendChild(footer2(2, d.ai ? "p.3 → AI" : "p.3 → Tech news"));
+    if (d.ai) return [p2, aiPage()];
     var p3 = page(3, "Tech");
     p3.classList.add("tech-expanded", "cover-tech");
     var first = card(d.briefs[0], [t("src: "), srcName(d.briefs[0])]);
@@ -1200,7 +1299,7 @@ a.lk{color:inherit;text-decoration:none}
     ]));
     var band = h("nav", "band", []);
     band.setAttribute("aria-label", "In this issue");
-    (eight ? [["p.2–3", "Tech"], ["p.4", "Chips"], ["p.5", "Explainer"], ["p.6–7", "Companies"], ["p.8", "World"], ["web", "GitHub"]] : d.companies ? [["p.2", "Tech"], ["p.3", "Explainer"], ["p.4–5", "Companies"], ["p.6", "World"], ["web", "GitHub edition"]] :
+    (eight ? (d.ai ? [["p.2", "Tech"], ["p.3", "AI"]] : [["p.2–3", "Tech"]]).concat([["p.4", "Chips"], ["p.5", "Explainer"], ["p.6–7", "Companies"], ["p.8", "World"], ["web", "GitHub"]]) : d.companies ? [["p.2", "Tech"], ["p.3", "Explainer"], ["p.4–5", "Companies"], ["p.6", "World"], ["web", "GitHub edition"]] :
       [["p.2", "Tech"], ["p.3", "Explainer"], ["p.4", "World"], ["p.6", "Markets"], ["web", "GitHub edition"]]).forEach(function (x, i) {
       if (i === 2) band.appendChild(h("span", "sp", []));
       band.appendChild(h("span", null, [h("b", null, [t(x[0])]), t(x[1])]));
@@ -1219,7 +1318,7 @@ a.lk{color:inherit;text-decoration:none}
     var heads = function (list) { return list.map(function (x) { return x.headline; }).join(" · "); };
     var top = d.repos[0];
     var idx = eight ? [
-      ["p.2–3", "Tech news", heads(d.briefs)],
+      ["p.2–3", "Tech news", heads(d.briefs || [])],
       ["p.4", "Semiconductors", d.semiconductors.lead.headline],
       ["p.5", "Explainer", d.explainer.headline],
       ["p.6–7", "Companies / Markets", heads(d.companies)],

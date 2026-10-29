@@ -18,7 +18,7 @@
 
 **The Commit** is a small technology newspaper that comes out every **Monday and Thursday**. Each issue is eight A4 pages: something you can read in 12 to 15 minutes, on screen or printed and folded on the kitchen table.
 
-It covers AI, the big products and platforms, security and privacy, regulation, what companies are actually doing, and technology beyond Silicon Valley. There is a full page on **semiconductors**: memory, new factories, lithography, Chinese chipmaking, advanced packaging. The last page is a short briefing on the world outside tech.
+It covers AI, the big products and platforms, security and privacy, regulation, what companies are actually doing, and technology beyond Silicon Valley. There is a full page on **AI**, with the week's news and the new models worth knowing about, and a full page on **semiconductors**: memory, new factories, lithography, Chinese chipmaking, advanced packaging. The last page is a short briefing on the world outside tech.
 
 Every issue also has a **GitHub edition**: two pages on the open-source projects people are starring this week, each explained in a sentence anyone can follow, plus two longer looks at the most interesting ones.
 
@@ -31,7 +31,8 @@ Every issue also has a **GitHub edition**: two pages on the open-source projects
 | Page | Section | What you get |
 |:---:|---|---|
 | 1 | **Lead** | The story that matters most, explained: what changed, the evidence, why it matters |
-| 2–3 | **Tech** | Four briefs and six short radar items |
+| 2 | **Tech** | The cover story in full and four short radar items |
+| 3 | **AI** | The week's main AI story and Model watch: new models from the labs and trending on Hugging Face, with size and capability icons |
 | 4 | **Chips** | Fabs, memory, lithography, packaging, and how close any of it is to real production |
 | 5 | **Explainer** | One idea taken apart slowly, plus a byte-sized joke |
 | 6–7 | **Companies** | Eight company moves, with the evidence, and a markets panel (numbers only, no advice) |
