@@ -1,5 +1,5 @@
 {
-  "stamp": 1793484029,
+  "stamp": 1793570429,
   "source": "finance.yahoo.com",
   "items": [
     {
@@ -26,9 +26,9 @@
     {
       "symbol": "BTC",
       "name": "Bitcoin",
-      "price": 77530.93,
-      "change": 0.43,
-      "time": 1793484024
+      "price": 77800.0,
+      "change": 0.46,
+      "time": 1793570427
     },
     {
       "symbol": "NVDA",
