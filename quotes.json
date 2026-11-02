@@ -1,174 +1,174 @@
 {
-  "stamp": 1793570429,
+  "stamp": 1793656829,
   "source": "finance.yahoo.com",
   "items": [
     {
       "symbol": "GSPC",
       "name": "S&P 500",
-      "price": 7580.07,
-      "change": -1.82,
-      "time": 1793393263
+      "price": 7541.4,
+      "change": -0.51,
+      "time": 1793656259
     },
     {
       "symbol": "IXIC",
       "name": "Nasdaq",
-      "price": 25437.0,
-      "change": -2.86,
-      "time": 1793394959
+      "price": 25164.32,
+      "change": -1.07,
+      "time": 1793656825
     },
     {
       "symbol": "STOXX50E",
       "name": "Euro Stoxx 50",
-      "price": 6131.31,
-      "change": -1.22,
-      "time": 1793379600
+      "price": 6176.06,
+      "change": 0.73,
+      "time": 1793638800
     },
     {
       "symbol": "BTC",
       "name": "Bitcoin",
-      "price": 77800.0,
-      "change": 0.46,
-      "time": 1793570427
+      "price": 76719.09,
+      "change": -1.94,
+      "time": 1793656826
     },
     {
       "symbol": "NVDA",
       "name": "Nvidia",
-      "price": 204.64,
-      "change": -4.22,
-      "time": 1793390401
+      "price": 202.06,
+      "change": -1.26,
+      "time": 1793653201
     },
     {
       "symbol": "AAPL",
       "name": "Apple",
-      "price": 344.63,
-      "change": -1.23,
-      "time": 1793390401
+      "price": 338.32,
+      "change": -1.83,
+      "time": 1793653201
     },
     {
       "symbol": "MSFT",
       "name": "Microsoft",
-      "price": 521.91,
-      "change": -1.55,
-      "time": 1793390401
+      "price": 507.12,
+      "change": -2.83,
+      "time": 1793653201
     },
     {
       "symbol": "GOOGL",
       "name": "Alphabet",
-      "price": 279.84,
-      "change": -1.4,
-      "time": 1793390401
+      "price": 278.99,
+      "change": -0.3,
+      "time": 1793653202
     },
     {
       "symbol": "AMZN",
       "name": "Amazon",
-      "price": 240.35,
-      "change": -1.41,
-      "time": 1793390401
+      "price": 245.63,
+      "change": 2.2,
+      "time": 1793653202
     },
     {
       "symbol": "META",
       "name": "Meta",
-      "price": 614.99,
-      "change": -1.53,
-      "time": 1793390401
+      "price": 606.73,
+      "change": -1.34,
+      "time": 1793653201
     },
     {
       "symbol": "TSLA",
       "name": "Tesla",
-      "price": 399.81,
-      "change": -0.87,
-      "time": 1793390400
+      "price": 403.82,
+      "change": 1.0,
+      "time": 1793653201
     },
     {
       "symbol": "AVGO",
       "name": "Broadcom",
-      "price": 326.08,
-      "change": -5.48,
-      "time": 1793390401
+      "price": 322.23,
+      "change": -1.18,
+      "time": 1793653201
     },
     {
       "symbol": "TSM",
       "name": "TSMC",
-      "price": 406.13,
-      "change": -5.95,
-      "time": 1793390402
+      "price": 398.63,
+      "change": -1.85,
+      "time": 1793653202
     },
     {
       "symbol": "AMD",
       "name": "AMD",
-      "price": 504.8,
-      "change": -10.88,
-      "time": 1793390401
+      "price": 466.84,
+      "change": -7.52,
+      "time": 1793653202
     },
     {
       "symbol": "ASML",
       "name": "ASML",
-      "price": 1565.9,
-      "change": -6.55,
-      "time": 1793390401
+      "price": 1526.14,
+      "change": -2.54,
+      "time": 1793653201
     },
     {
       "symbol": "NFLX",
       "name": "Netflix",
-      "price": 62.08,
-      "change": 0.05,
-      "time": 1793390400
+      "price": 62.34,
+      "change": 0.42,
+      "time": 1793653200
     },
     {
       "symbol": "ORCL",
       "name": "Oracle",
-      "price": 130.67,
-      "change": -6.37,
-      "time": 1793390622
+      "price": 119.22,
+      "change": -8.76,
+      "time": 1793653466
     },
     {
       "symbol": "INTC",
       "name": "Intel",
-      "price": 65.76,
-      "change": -28.58,
-      "time": 1793390401
+      "price": 59.97,
+      "change": -8.8,
+      "time": 1793653201
     },
     {
       "symbol": "PLTR",
       "name": "Palantir",
-      "price": 184.11,
-      "change": -6.27,
-      "time": 1793390400
+      "price": 178.34,
+      "change": -3.13,
+      "time": 1793653200
     },
     {
       "symbol": "CRM",
       "name": "Salesforce",
-      "price": 229.17,
-      "change": -0.75,
-      "time": 1793390402
+      "price": 226.18,
+      "change": -1.3,
+      "time": 1793653202
     },
     {
       "symbol": "SAP",
       "name": "SAP",
-      "price": 235.02,
-      "change": 0.41,
-      "time": 1793390402
+      "price": 233.62,
+      "change": -0.6,
+      "time": 1793653202
     },
     {
       "symbol": "ARM",
       "name": "Arm",
-      "price": 205.97,
-      "change": -9.97,
-      "time": 1793390401
+      "price": 196.79,
+      "change": -4.46,
+      "time": 1793653201
     },
     {
       "symbol": "SMCI",
       "name": "Supermicro",
-      "price": 32.95,
-      "change": -4.3,
-      "time": 1793390401
+      "price": 30.44,
+      "change": -7.62,
+      "time": 1793653201
     },
     {
       "symbol": "COIN",
       "name": "Coinbase",
-      "price": 143.54,
-      "change": -10.62,
-      "time": 1793390401
+      "price": 137.83,
+      "change": -3.98,
+      "time": 1793653202
     }
   ]
 }
