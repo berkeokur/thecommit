@@ -1,0 +1,25 @@
+/* Share desk: the archive's paper, type and blue, with open issue rows. */
+.sh-header{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-bottom:20px;border-bottom:3px solid var(--ink)}
+.sh-brand{font-size:28px;line-height:1;font-weight:650;letter-spacing:-.05em}
+.sh-brand span{color:var(--accent)}
+.sh-intro{padding:48px 0 36px;max-width:650px}
+.sh-intro h1{font-size:clamp(36px,6vw,64px);line-height:1.1;font-weight:600;letter-spacing:-.045em}
+.sh-intro p{margin-top:18px;color:var(--graphite);font-size:18px;line-height:1.6}
+.sh-issue{display:grid;grid-template-columns:160px minmax(0,1fr);gap:32px;padding:28px 0;border-bottom:1px solid var(--hair)}
+.sh-preview{align-self:start;display:block;background:var(--desk);padding:8px}
+.sh-preview img{display:block;width:100%;height:auto;box-shadow:0 2px 8px #11121422}
+.sh-body{align-self:center;min-width:0}
+.sh-body h2{margin-top:10px;font-size:clamp(22px,3vw,30px);line-height:1.2;letter-spacing:-.025em;font-weight:600}
+.sh-body h2 a:hover{color:var(--accent)}
+.sh-deck{color:var(--graphite);margin-top:10px;max-width:660px}
+.sh-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:22px}
+.sh-actions .s-btn{font-size:11px;padding:10px 12px}
+@media(max-width:640px){
+ .sh-header{align-items:baseline}.sh-brand{font-size:24px}.sh-header .s-link{font-size:10px}
+ .sh-intro{padding:32px 0 24px}.sh-intro p{font-size:16px}
+ .sh-issue{grid-template-columns:80px minmax(0,1fr);gap:16px;padding:24px 0}
+ .sh-body .s-meta{font-size:10px}.sh-body h2{font-size:21px}
+ .sh-preview{padding:4px}.sh-deck{font-size:14px}
+ .sh-actions{gap:10px;margin-top:16px}
+}
+.sh-intro + .s-allhead{display:flex;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--ink)}
