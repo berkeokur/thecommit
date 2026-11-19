@@ -231,6 +231,15 @@ p{text-wrap:pretty}
 @media screen{.ghdive .win .cur{animation:blink 1.1s steps(1) infinite}}
 @keyframes blink{50%{opacity:0}}
 
+/* Eight equal repository sections: a two-by-two grid on each page. */
+.ghsections{margin-top:20px;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:24px 30px}
+.ghsections .ghsection{grid-row:auto;display:flex;flex-direction:column;min-height:0;overflow:hidden;border-top:1px solid var(--hair);padding-top:12px}
+.ghsection .win{flex-shrink:0}
+.ghsection .win .title{left:70px;right:8px}
+.ghsection .win .body{font-size:11px;line-height:17px}
+.ghsection .about{margin-top:12px;font-size:14px;line-height:1.45}
+.ghsection .src{margin-top:auto;padding-top:8px}
+
 .footer-wrap{margin-top:auto;padding-top:18px;flex-shrink:0}
 /* last page of each edition: the footer becomes an ink colophon band, as on the promo poster; same height as the rule-and-text footer */
 .colophon footer{border-top:0;padding:6px 10px 7px;background:var(--ink);color:var(--hair);align-items:center;white-space:nowrap}
@@ -348,15 +357,15 @@ a.lk{color:inherit;text-decoration:none}
 <meta property="og:site_name" content="The Commit">
 <meta property="og:url" content="https://berkeokur.github.io/thecommit/issues/2026/11/006/tr/github/">
 <meta property="og:title" content="The Commit No. 006: GitHub eki">
-<meta property="og:description" content="Öne çıkan on beş GitHub deposunun açıklamaları ve iki ayrıntılı inceleme.">
-<meta property="og:image" content="https://berkeokur.github.io/thecommit/assets/og-card.png?v=2348f2c4">
+<meta property="og:description" content="Öne çıkan GitHub depoları, açıklamaları ve bağlantılarıyla.">
+<meta property="og:image" content="https://berkeokur.github.io/thecommit/assets/og-card.png?v=6c2db506">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The Commit: teknoloji haberleri, yalın bir dille">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Commit No. 006: GitHub eki">
-<meta name="twitter:description" content="Öne çıkan on beş GitHub deposunun açıklamaları ve iki ayrıntılı inceleme.">
-<meta name="twitter:image" content="https://berkeokur.github.io/thecommit/assets/og-card.png?v=2348f2c4">
+<meta name="twitter:description" content="Öne çıkan GitHub depoları, açıklamaları ve bağlantılarıyla.">
+<meta name="twitter:image" content="https://berkeokur.github.io/thecommit/assets/og-card.png?v=6c2db506">
 <link rel="stylesheet" href="../../../../../../assets/reader.css?v=83bda60b">
 </head>
 <body>
@@ -947,6 +956,9 @@ a.lk{color:inherit;text-decoration:none}
   "deep dives: ": "incelemeler: ",
   "deep dives · p.2": "inceleme · s.2",
   "two deep dives": "iki inceleme",
+  "Weekly gains": "Haftalık artış",
+  "Daily gains": "Günlük artış",
+  "repos per page": "sayfa başına depo",
   "more repos": "diğer depolar",
   "Deep dives": "İncelemeler",
   "Trending": "Öne çıkanlar",
@@ -1579,6 +1591,24 @@ a.lk{color:inherit;text-decoration:none}
   }
 
   // ---------- GitHub edition: two pages for the screen, every repo linked ----------
+  function githubSectionGrid(repos, offset) {
+    var grid = h("section", "ghsections", repos.map(function (r, i) {
+      var item = h("article", "ghdive ghsection", [
+        h("div", "win", [
+          h("div", "bar", [h("span", "lights", [h("i"), h("i"), h("i")]),
+            h("span", "title", [link(r.url, [r.full_name.split("/")[1]])])]),
+          h("div", "body", [
+            h("p", null, [h("span", "ps", [pad(offset + i + 1, 2) + " · "]), link(r.url, [r.full_name])]),
+            h("p", null, [r.language + " · " + t("Stars") + " " + k(r.stars) + " · " + t("Gained") + " +" + k(r.stars_gained)])])]),
+        h("p", "about", [r.about]),
+        h("p", "meta src", [link(r.url, [t("Source: project README")])])
+      ]);
+      item.setAttribute("aria-label", "Repository: " + r.full_name);
+      return fit(item, "GitHub repo " + (offset + i + 1));
+    }));
+    grid.setAttribute("aria-label", "Repository sections");
+    return grid;
+  }
   function githubPages() {
     var dives = d.github_deep_dives;
     var g1 = h("section", "page gh", []);
@@ -1603,6 +1633,17 @@ a.lk{color:inherit;text-decoration:none}
     band.appendChild(h("span", null, [h("b", null, [String(d.repos.length)]), t("trending repos")]));
     if (dives) band.appendChild(h("span", null, [h("b", null, ["2"]), t("deep dives · p.2")]));
     g1.appendChild(band);
+    if (d.github_layout === "sections") {
+      band.appendChild(h("span", null, [h("b", null, ["4"]), t("repos per page")]));
+      band.appendChild(h("span", null, [t(d.issue.gains === "week" ? "Weekly gains" : "Daily gains")]));
+      g1.appendChild(githubSectionGrid(d.repos.slice(0, 4), 0));
+      g1.appendChild(footer2(1, "p.2 → more repos"));
+      var sectionsPage2 = page(2, "Trending · " + (d.issue.gains === "week" ? "Weekly gains" : "Daily gains"));
+      sectionsPage2.classList.add("gh");
+      sectionsPage2.appendChild(githubSectionGrid(d.repos.slice(4, 8), 4));
+      sectionsPage2.appendChild(footer2(2, "next issue → " + dayMonth(d.issue.next_date)));
+      return [g1, sectionsPage2];
+    }
 
     var row = function (r, i) {
       var parts = r.full_name.split("/");

@@ -37,7 +37,7 @@ Every issue also has a **GitHub edition**: two pages on the open-source projects
 | 5 | **Explainer** | One idea taken apart slowly, plus a byte-sized joke |
 | 6–7 | **Companies** | Eight company moves, with the evidence, and a markets panel (numbers only, no advice) |
 | 8 | **World** | Six briefs from beyond tech |
-| web | **GitHub** | 15 trending repos in plain words and 2 deep dives |
+| web | **GitHub** | 8 repos in dedicated sections, four per page |
 
 <p align="center">
   <img src=".github/readme/issue-pages.png" alt="All eight pages of issue 001 and the two pages of its GitHub edition, side by side" width="100%">
@@ -49,10 +49,10 @@ Every issue also has a **GitHub edition**: two pages on the open-source projects
       <img src=".github/readme/story-poster.png" alt="Each issue as a git log: lead, tech, chips, explainer, companies, markets, world, github" width="100%">
     </td>
     <td width="50%" valign="top">
-      <img src=".github/readme/github-card.png" alt="The Commit GitHub edition: 15 trending repos, explained, and 2 deep dives every issue" width="100%">
+      <img src=".github/readme/github-card.png" alt="The Commit GitHub edition: 8 repositories explained, four per page" width="100%">
       <br><br>
       <h3>The GitHub edition</h3>
-      <p>GitHub's trending page tells you <i>what</i> is popular, but rarely what a project does or who it is for. The GitHub edition lists 15 trending repositories with their exact stars and weekly gains, each described in 14 to 20 plain words. Two of them get a closer look: what makes them different, how they work, who they help, and what their own documentation says they can't do yet.</p>
+      <p>GitHub's trending page tells you <i>what</i> is popular, but rarely what a project does or who it is for. The GitHub edition covers eight trending repositories across two pages, with four dedicated sections per page. Each gets its exact stars and gains and a 75–90-word explanation: what it does, who it helps, what makes its approach distinctive, and what its documentation says about limitations.</p>
       <p>Every repository name links straight to GitHub.</p>
     </td>
   </tr>
