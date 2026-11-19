@@ -69,7 +69,7 @@ So I built one. It started as a personal paper I print at home twice a week, and
 The Commit is **written by AI** and says so on every issue. A small pipeline on a home server makes each one:
 
 <p align="center">
-  <img src=".github/readme/pipeline.png" alt="Pipeline: Collect (script) → Pick (AI) → Fetch (script) → Write (AI) → Check (rules and fact check) → Publish (PDF, web, English and Turkish). Flagged issues are held and reviewed by hand before publishing." width="100%">
+  <img src=".github/readme/pipeline.png" alt="Pipeline: Collect (script) → Pick (AI) → Fetch (script) → Write (AI) → Check (sources and PDF layout) → Publish (PDF, web, English and Turkish). Source validation and certified PDFs are required before release." width="100%">
 </p>
 
 Scripts gather the news; AI picks and writes, working only from the pages the scripts collected; every number and quote is checked against its source before an issue goes online. Every story links to that source, so you can always read the original.
@@ -85,7 +85,7 @@ The Commit is **free to read**: no paywall, no sign-up, no ads, no tracking. Rea
 
 ## About this repository
 
-This repository holds the **published website** and is generated automatically: each new issue, fact-check approval and daily market update is pushed here by the publishing server, so changes made here directly are overwritten. Found a mistake in an issue? Please [open an issue](https://github.com/berkeokur/thecommit/issues) and link the story.
+This repository holds the **published website** and is generated automatically: each new issue and daily market update is pushed here by the publishing server, so changes made here directly are overwritten. Found a mistake in an issue? Please [open an issue](https://github.com/berkeokur/thecommit/issues) and link the story.
 
 Market figures are for information only and are not investment advice.
 
