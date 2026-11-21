@@ -1,5 +1,5 @@
 {
-  "stamp": 1795212059,
+  "stamp": 1795298459,
   "source": "finance.yahoo.com",
   "items": [
     {
@@ -14,7 +14,7 @@
       "name": "Nasdaq",
       "price": 22617.73,
       "change": -5.28,
-      "time": 1795212057
+      "time": 1795212959
     },
     {
       "symbol": "STOXX50E",
@@ -26,9 +26,9 @@
     {
       "symbol": "BTC",
       "name": "Bitcoin",
-      "price": 58859.64,
-      "change": -4.92,
-      "time": 1795212053
+      "price": 60338.84,
+      "change": 2.61,
+      "time": 1795298454
     },
     {
       "symbol": "NVDA",
